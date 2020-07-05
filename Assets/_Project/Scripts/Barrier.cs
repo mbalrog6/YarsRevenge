@@ -43,11 +43,16 @@ public class Barrier : MonoBehaviour
     {
         CalculateBarriorBounds();
         var text = GetCellFromVector3(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-        if (text != null)
+        if (text.HasValue)
         {
-            _cells[text.Value].GetComponent<MeshRenderer>().material.color = Color.yellow;
+            SetCellColor(text.Value, Color.yellow);
         }
         DebugText.Instance.SetText($"Index of Cell: {text.ToString()}");
+    }
+
+    public void SetCellColor(int index, Color color)
+    {
+        _cells[index].GetComponent<MeshRenderer>().material.color = color;
     }
 
     private void CalculateBarriorBounds()
