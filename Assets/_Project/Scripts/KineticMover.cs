@@ -21,6 +21,6 @@ public class KineticMover : IMover
         _moveVector = _player.DirectionVector;
         _moveVector *= (Time.deltaTime * _player.MovementSpeed);
         
-        _transform.Translate(_moveVector);
+        _transform.position += _moveVector;
     }
 }

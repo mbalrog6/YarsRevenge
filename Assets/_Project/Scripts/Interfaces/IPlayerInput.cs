@@ -1,12 +1,5 @@
 ﻿public interface IPlayerInput
 {
-    float Horizontal { get; }
-    float Vertical { get; }
-
-    Direction PlayerDirection { get; }
-    Direction LastPlayerDirection { get; }
-    
-    Direction LastPlayerFacing { get; }
-
+    InputDTO Inputs { get; }
     void Tick();
 }

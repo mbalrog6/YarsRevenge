@@ -21,7 +21,11 @@ namespace a_player
             
             Assert.AreEqual(playerPositionX, player.transform.position.x);
 
-            player.PlayerInput.Horizontal.Returns(1f);
+            player.PlayerInput.Inputs.Returns(
+                new InputDTO(0f, 1f,
+                    CardinalDirection.EAST,
+                    CardinalDirection.EAST,
+                CardinalDirection.EAST));
             yield return new WaitForSeconds(2f);
             
             Assert.Less(playerPositionX, player.transform.position.x);
@@ -39,7 +43,11 @@ namespace a_player
             
             Assert.AreEqual(playerPositionX, player.transform.position.x);
 
-            player.PlayerInput.Horizontal.Returns(-1f);
+            player.PlayerInput.Inputs.Returns(
+                new InputDTO(0f, -1f,
+                    CardinalDirection.WEST,
+                    CardinalDirection.WEST,
+                    CardinalDirection.WEST));
             yield return new WaitForSeconds(2f);
             
             Assert.Greater(playerPositionX, player.transform.position.x);
@@ -57,7 +65,11 @@ namespace a_player
             
             Assert.AreEqual(playerPositionY, player.transform.position.y);
 
-            player.PlayerInput.Vertical.Returns(1f);
+            player.PlayerInput.Inputs.Returns(
+                new InputDTO(1f, 0f,
+                    CardinalDirection.NORTH,
+                    CardinalDirection.NORTH,
+                    CardinalDirection.NORTH));
             yield return new WaitForSeconds(2f);
             
             Assert.Less(playerPositionY, player.transform.position.y);
@@ -75,7 +87,11 @@ namespace a_player
             
             Assert.AreEqual(playerPositionY, player.transform.position.y);
 
-            player.PlayerInput.Vertical.Returns(-1f);
+            player.PlayerInput.Inputs.Returns(
+                new InputDTO(-1f, 0f,
+                    CardinalDirection.SOUTH,
+                    CardinalDirection.SOUTH,
+                    CardinalDirection.SOUTH));
             yield return new WaitForSeconds(2f);
             
             Assert.Greater(playerPositionY, player.transform.position.y);
