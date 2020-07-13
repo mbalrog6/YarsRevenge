@@ -103,4 +103,29 @@ public static class CardinalDirections
     
     return GetDirectionFromInput(vertical, horizontal);
   }
+
+  public static CardinalDirection GetOppisiteDirection(CardinalDirection direction)
+  {
+    switch (direction)
+    {
+      case CardinalDirection.NORTH:
+        return CardinalDirection.SOUTH;
+      case CardinalDirection.EAST:
+        return CardinalDirection.WEST;
+      case CardinalDirection.SOUTH:
+        return CardinalDirection.NORTH;
+      case CardinalDirection.WEST:
+        return CardinalDirection.EAST;
+       case CardinalDirection.NORTH_EAST:
+         return CardinalDirection.SOUTH_WEST;
+       case CardinalDirection.SOUTH_EAST:
+         return CardinalDirection.NORTH_WEST;
+       case CardinalDirection.SOUTH_WEST:
+         return CardinalDirection.NORTH_EAST;
+       case CardinalDirection.NORTH_WEST:
+         return CardinalDirection.SOUTH_EAST;
+         default:
+           return CardinalDirection.NONE;
+    }
+  }
 }

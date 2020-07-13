@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
-
 public class DirectionalRotator : IRotator
 {
     private Player player;
@@ -14,8 +12,11 @@ public class DirectionalRotator : IRotator
     
     public void Tick()
     {
-        var angle = Vector3.Angle(player.LastFacingDirectionVector, Vector3.up);
-        switch (player.PlayerInput.Inputs.LastFacingDirection)
+        if (player.PlayerInputDTO.Direction == CardinalDirection.NONE)
+            return; 
+        
+        var angle = Vector3.Angle(player.DirectionVector, Vector3.up);
+        switch (player.PlayerInputDTO.Direction)
         {
             case CardinalDirection.EAST:
             case CardinalDirection.SOUTH_EAST:

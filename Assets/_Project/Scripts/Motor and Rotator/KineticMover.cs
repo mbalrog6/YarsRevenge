@@ -14,10 +14,6 @@ public class KineticMover : IMover
     
     public void Tick()
     {
-        //_moveVector.x = _player.PlayerInput.Horizontal;
-        //_moveVector.y = _player.PlayerInput.Vertical;
-        //_moveVector.z = 0f;
-        //_moveVector.Normalize();
         _moveVector = _player.DirectionVector;
         _moveVector *= (Time.deltaTime * _player.MovementSpeed);
         

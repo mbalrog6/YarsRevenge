@@ -16,6 +16,12 @@ public struct InputDTO
         this.LastDirection = lastDirection;
         this.LastFacingDirection = lastFacingDirection;
     }
+    
+    public override string ToString()
+    {
+        var inputsSting = $"Vertical = {Vertical}\r\nHorizontal = {Horizontal}\r\nDirection = {Direction.ToString()}\r\nLastDirection = {LastDirection.ToString()}\r\nLastFacingDirection = {LastFacingDirection.ToString()} ";
+        return inputsSting;
+    }
 }
 public class PlayerInput : IPlayerInput
 {
@@ -47,5 +53,23 @@ public class PlayerInput : IPlayerInput
         input.Direction = CardinalDirections.GetDirectionFromInput(input.Vertical, input.Horizontal);
 
         _inputDTO = input;
+    }
+    
+    public void CopyDTO(ref InputDTO inputDTO)
+    {
+        inputDTO.Vertical = _inputDTO.Vertical;
+        inputDTO.Horizontal = _inputDTO.Horizontal;
+        inputDTO.Direction = _inputDTO.Direction;
+        inputDTO.LastDirection = _inputDTO.LastDirection;
+        inputDTO.LastFacingDirection = _inputDTO.LastFacingDirection;
+    }
+
+    public void SetInput(InputDTO inputs)
+    {
+        _inputDTO.Direction = inputs.Direction;
+        _inputDTO.LastDirection = inputs.LastDirection;
+        _inputDTO.LastFacingDirection = inputs.LastFacingDirection;
+        _inputDTO.Vertical = inputs.Vertical;
+        _inputDTO.Horizontal = inputs.Horizontal;
     }
 }

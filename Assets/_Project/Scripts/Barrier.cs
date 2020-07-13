@@ -47,12 +47,16 @@ public class Barrier : MonoBehaviour
         {
             SetCellColor(text.Value, Color.yellow);
         }
-        DebugText.Instance.SetText($"Index of Cell: {text.ToString()}");
     }
 
     public void SetCellColor(int index, Color color)
     {
         _cells[index].GetComponent<MeshRenderer>().material.color = color;
+    }
+
+    public void DisableCell(int index)
+    {
+        _cells[index].gameObject.SetActive(false);
     }
 
     private void CalculateBarriorBounds()
@@ -79,7 +83,23 @@ public class Barrier : MonoBehaviour
         int y = (int)Mathf.Floor(point.y / HeightOfCell);
 
         int? index = x + (y * width);
+        if (!_cells[index.Value].isActiveAndEnabled)
+        {
+            index = null; 
+        }
         return index;
+    }
+
+    public Vector3 GetEdgeOfCellFromPoint(int cellIndex, Vector3 point, CardinalDirection directionOfContact)
+    {
+        Vector3 centerToPoint = point - _cells[cellIndex].transform.position;
+        switch (directionOfContact)
+        {
+            case CardinalDirection.NORTH:
+                return new Vector3();
+        }
+
+        return Vector3.zero;
     }
 
     private void OnDrawGizmos()
