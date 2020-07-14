@@ -5,6 +5,7 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField] private Barrier _barrier;
+    [SerializeField] private Bullet _bullet;
     [SerializeField] private float movementSpeed;
     [SerializeField] private Transform[] _frontContactPoints;
     [SerializeField] private Transform[] _backContactPoints;
@@ -35,6 +36,7 @@ public class Player : MonoBehaviour
     private int? BarrierCellIndex;
     private InputDTO _playerInputDTO;
     private float delayTimer = 0f;
+    private bool _canFireBullet;
 
     private void Awake()
     {
@@ -43,6 +45,9 @@ public class Player : MonoBehaviour
         PlayerInput = new PlayerInput();
         _mover = new KineticMover(this);
         _rotator = new DirectionalRotator(this);
+        
+        _bullet.DisableBullet();
+        _canFireBullet = true;
     }
 
     private void OnValidate()
@@ -62,9 +67,8 @@ public class Player : MonoBehaviour
 
         PlayerInput.Tick();
         PlayerInput.CopyDTO(ref _playerInputDTO);
-        
         _rotator.Tick();
-        
+
         BarrierCellIndex = null; 
 
         if (CheckForRectCollision(_collisionRect.Bounds, _barrier.BarriorBounds))
@@ -106,6 +110,16 @@ public class Player : MonoBehaviour
                 EatCell(BarrierCellIndex.Value);
                 _collisionRect.UpdateToTargetPosition();
             }
+        }
+
+        FireBulletIfPossible();
+    }
+
+    private void FireBulletIfPossible()
+    {
+        if (!_bullet.isActiveAndEnabled && PlayerInput.Inputs.FireButton == true)
+        {
+            _bullet.FireBullet();
         }
         
     }

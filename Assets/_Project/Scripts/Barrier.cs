@@ -59,12 +59,56 @@ public class Barrier : MonoBehaviour
         _cells[index].gameObject.SetActive(false);
     }
 
+    public void DisableCellsInPlusPattern(int index)
+    {
+        var totalCells = width * height; 
+        var above = index + width;
+        var right = index + 1;
+        var left = index - 1;
+        var bellow = index - width;
+
+        if (index != 0)
+        {
+            if (index % (width) == 0)
+            {
+                left = -1;
+            }
+
+            if (index % (width - 1) == 0)
+            {
+                right = -1;
+            }
+        }
+
+        DisableCell(index);
+        
+        if (above >= 0 && above < totalCells)
+        {
+            DisableCell(above);
+        }
+        
+        if (bellow >= 0 && bellow < totalCells)
+        {
+            DisableCell(bellow);
+        }
+        
+        if (right >= 0 && right < totalCells)
+        {
+            DisableCell(right);
+        }
+        
+        if (left >= 0 && left < totalCells)
+        {
+            DisableCell(left);
+        }
+    }
+
     private void CalculateBarriorBounds()
     {
         var width = this.width * WidthOfCell;
         var height = this.height * HeightOfCell;
-        var left = transform.position.x - (WidthOfCell / 2);// - (width / 2);
-        var bottom = transform.position.y - (HeightOfCell / 2);// - (height / 2);
+        var left = transform.position.x - (WidthOfCell / 2);
+        var bottom = transform.position.y - (HeightOfCell / 2);
 
         BarriorBounds = new Rect(left, bottom, width, height);
     }
@@ -88,18 +132,6 @@ public class Barrier : MonoBehaviour
             index = null; 
         }
         return index;
-    }
-
-    public Vector3 GetEdgeOfCellFromPoint(int cellIndex, Vector3 point, CardinalDirection directionOfContact)
-    {
-        Vector3 centerToPoint = point - _cells[cellIndex].transform.position;
-        switch (directionOfContact)
-        {
-            case CardinalDirection.NORTH:
-                return new Vector3();
-        }
-
-        return Vector3.zero;
     }
 
     private void OnDrawGizmos()

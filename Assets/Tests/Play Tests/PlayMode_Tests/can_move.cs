@@ -22,7 +22,7 @@ namespace a_player
             Assert.AreEqual(playerPositionX, player.transform.position.x);
 
             player.PlayerInput.Inputs.Returns(
-                new InputDTO(0f, 1f,
+                new InputDTO(0f, 1f, false,
                     CardinalDirection.EAST,
                     CardinalDirection.EAST,
                 CardinalDirection.EAST));
@@ -44,7 +44,7 @@ namespace a_player
             Assert.AreEqual(playerPositionX, player.transform.position.x);
 
             player.PlayerInput.Inputs.Returns(
-                new InputDTO(0f, -1f,
+                new InputDTO(0f, -1f, false, 
                     CardinalDirection.WEST,
                     CardinalDirection.WEST,
                     CardinalDirection.WEST));
@@ -66,7 +66,7 @@ namespace a_player
             Assert.AreEqual(playerPositionY, player.transform.position.y);
 
             player.PlayerInput.Inputs.Returns(
-                new InputDTO(1f, 0f,
+                new InputDTO(1f, 0f, false, 
                     CardinalDirection.NORTH,
                     CardinalDirection.NORTH,
                     CardinalDirection.NORTH));
@@ -88,7 +88,7 @@ namespace a_player
             Assert.AreEqual(playerPositionY, player.transform.position.y);
 
             player.PlayerInput.Inputs.Returns(
-                new InputDTO(-1f, 0f,
+                new InputDTO(-1f, 0f, false,
                     CardinalDirection.SOUTH,
                     CardinalDirection.SOUTH,
                     CardinalDirection.SOUTH));

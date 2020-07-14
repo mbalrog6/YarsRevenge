@@ -4,14 +4,20 @@ public struct InputDTO
 {
     public float Vertical;
     public float Horizontal;
+    public bool FireButton;
     public CardinalDirection Direction; 
     public CardinalDirection LastDirection;
     public CardinalDirection LastFacingDirection;
 
-    public InputDTO( float horizontal, float vertical, CardinalDirection direction, CardinalDirection lastDirection, CardinalDirection lastFacingDirection )
+    public InputDTO( float horizontal, float vertical, 
+        bool fireButton,
+        CardinalDirection direction, 
+        CardinalDirection lastDirection, 
+        CardinalDirection lastFacingDirection )
     {
         this.Vertical = vertical;
         this.Horizontal = horizontal;
+        this.FireButton = fireButton;
         this.Direction = direction;
         this.LastDirection = lastDirection;
         this.LastFacingDirection = lastFacingDirection;
@@ -19,7 +25,8 @@ public struct InputDTO
     
     public override string ToString()
     {
-        var inputsSting = $"Vertical = {Vertical}\r\nHorizontal = {Horizontal}\r\nDirection = {Direction.ToString()}\r\nLastDirection = {LastDirection.ToString()}\r\nLastFacingDirection = {LastFacingDirection.ToString()} ";
+        var inputsSting = $"Vertical = {Vertical}\r\nHorizontal = {Horizontal}\r\nFirebutton = {FireButton.ToString()}\r\n" +
+                          $"Direction = {Direction.ToString()}\r\nLastDirection = {LastDirection.ToString()}\r\nLastFacingDirection = {LastFacingDirection.ToString()} ";
         return inputsSting;
     }
 }
@@ -31,9 +38,10 @@ public class PlayerInput : IPlayerInput
     public PlayerInput()
     {
         _inputDTO = new InputDTO(0f, 0f,
+            false,
             CardinalDirection.NONE,
             CardinalDirection.NONE,
-            CardinalDirection.NONE);
+            CardinalDirection.NORTH);
     }
     public void Tick()
     {
@@ -44,6 +52,8 @@ public class PlayerInput : IPlayerInput
     {
         input.Vertical = Input.GetAxisRaw("Vertical");
         input.Horizontal = Input.GetAxisRaw("Horizontal");
+
+        input.FireButton = Input.GetButton("Fire1");
 
         input.LastDirection = Inputs.Direction;
         if (input.LastDirection != CardinalDirection.NONE)
@@ -59,6 +69,7 @@ public class PlayerInput : IPlayerInput
     {
         inputDTO.Vertical = _inputDTO.Vertical;
         inputDTO.Horizontal = _inputDTO.Horizontal;
+        inputDTO.FireButton = _inputDTO.FireButton;
         inputDTO.Direction = _inputDTO.Direction;
         inputDTO.LastDirection = _inputDTO.LastDirection;
         inputDTO.LastFacingDirection = _inputDTO.LastFacingDirection;
@@ -69,6 +80,7 @@ public class PlayerInput : IPlayerInput
         _inputDTO.Direction = inputs.Direction;
         _inputDTO.LastDirection = inputs.LastDirection;
         _inputDTO.LastFacingDirection = inputs.LastFacingDirection;
+        _inputDTO.FireButton = inputs.FireButton;
         _inputDTO.Vertical = inputs.Vertical;
         _inputDTO.Horizontal = inputs.Horizontal;
     }
