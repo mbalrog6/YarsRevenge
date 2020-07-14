@@ -74,7 +74,7 @@ public class Barrier : MonoBehaviour
                 left = -1;
             }
 
-            if (index % (width - 1) == 0)
+            if (index % (width) == width - 1)
             {
                 right = -1;
             }

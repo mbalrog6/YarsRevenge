@@ -38,8 +38,7 @@ public class Bullet : MonoBehaviour
 
     private void CheckForOffScreen()
     {
-        if (transform.position.x > 10 || transform.position.x < -10 || transform.position.y > 10 ||
-            transform.position.y < -10)
+        if (!ScreenHelper.Instance.ScreenBounds.Contains(transform.position))
         {
             DisableBullet();
         }

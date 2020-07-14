@@ -69,6 +69,9 @@ public class Player : MonoBehaviour
         PlayerInput.CopyDTO(ref _playerInputDTO);
         _rotator.Tick();
 
+        LimitMovementToRightAndLeftScreenEdge();
+        WrapAroundTopBottomOfScreen();
+
         BarrierCellIndex = null; 
 
         if (CheckForRectCollision(_collisionRect.Bounds, _barrier.BarriorBounds))
@@ -114,6 +117,44 @@ public class Player : MonoBehaviour
 
         FireBulletIfPossible();
     }
+
+    private void WrapAroundTopBottomOfScreen()
+    {
+        var x = transform.position.x;
+        var y = transform.position.y;
+        
+        if (y > ScreenHelper.Instance.ScreenBounds.yMax)
+        {
+            y = ScreenHelper.Instance.ScreenBounds.yMin;
+        }
+        
+        if (y < ScreenHelper.Instance.ScreenBounds.yMin)
+        {
+            y = ScreenHelper.Instance.ScreenBounds.yMax;
+        }
+        
+        transform.position = new Vector3(x, y, 0f);
+    }
+
+    private void LimitMovementToRightAndLeftScreenEdge()
+    {
+        var x = transform.position.x;
+        var y = transform.position.y;
+        
+        if (x > ScreenHelper.Instance.ScreenBounds.xMax)
+        {
+            x = ScreenHelper.Instance.ScreenBounds.xMax;
+        }
+        
+        if (x < ScreenHelper.Instance.ScreenBounds.xMin)
+        {
+            x = ScreenHelper.Instance.ScreenBounds.xMin;
+        }
+
+        transform.position = new Vector3(x, y, 0f);
+    }
+    
+    
 
     private void FireBulletIfPossible()
     {
