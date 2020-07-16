@@ -10,15 +10,16 @@ public class LaunchTowardsPlayer : IState
 
     public LaunchTowardsPlayer(EntityStateMachine entity, Player player)
     {
+        _entity = entity;
         if (player == null)
         {
-            Debug.Log("Player is null");
+            Debug.Log("Player is null", _entity.gameObject);
         }
         else
         {
             _playerTransform = player.transform;
         }
-        _entity = entity;
+        
         _player = player;
         
     }
@@ -40,6 +41,8 @@ public class LaunchTowardsPlayer : IState
         var playerPosition = _playerTransform.position;
         _luanchDirection = playerPosition - _entity.transform.position;
         _luanchDirection.Normalize();
+        
+        Warlord.State = WarlordState.LaunchedTowardsPlayer;
     }
 
     public void OnExit()

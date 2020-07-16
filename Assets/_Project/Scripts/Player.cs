@@ -1,17 +1,20 @@
-﻿using System.Collections;
-using UnityEditor;
+﻿using System.Timers;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
     [SerializeField] private Barrier _barrier;
     [SerializeField] private Bullet _bullet;
+    [SerializeField] private CannonShot _cannonShot;
+    [SerializeField] private Warlord _warlord;
+
     [SerializeField] private float movementSpeed;
     [SerializeField] private Transform[] _frontContactPoints;
     [SerializeField] private Transform[] _backContactPoints;
     [SerializeField] private float eatCooldownTime = 1f;
     [SerializeField] private float _reboundDistance = 0.1f;
-
+    [SerializeField] private float bulletFireRate = .2f;
+    [SerializeField] private int cellAmmoValue = 2;
 
     public Vector3 DirectionVector =>
         CardinalDirections.GetUnitVectorFromCardinalDirection(PlayerInputDTO.Direction);
@@ -37,6 +40,12 @@ public class Player : MonoBehaviour
     private InputDTO _playerInputDTO;
     private float delayTimer = 0f;
     private bool _canFireBullet;
+    private float _fireBulletCooldownTimer;
+    private bool _cannonDeployed;
+
+
+    private int ammo = 0;
+
 
     private void Awake()
     {
@@ -45,8 +54,22 @@ public class Player : MonoBehaviour
         PlayerInput = new PlayerInput();
         _mover = new KineticMover(this);
         _rotator = new DirectionalRotator(this);
-        
+
         _bullet.DisableBullet();
+        _canFireBullet = true;
+        _fireBulletCooldownTimer = 0f;
+
+        _bullet.OnDisabled += Handle_BulletDisabled;
+        _cannonShot.OnDie += Handle_CannonShotOnDie;
+    }
+
+    private void Handle_CannonShotOnDie()
+    {
+        _cannonDeployed = false;
+    }
+
+    private void Handle_BulletDisabled()
+    {
         _canFireBullet = true;
     }
 
@@ -61,18 +84,16 @@ public class Player : MonoBehaviour
         {
             return;
         }
-        delayTimer = Time.time + 0.0f; 
-        
+
+        delayTimer = Time.time + 0.0f;
+
         _startPosition = transform.position;
 
         PlayerInput.Tick();
         PlayerInput.CopyDTO(ref _playerInputDTO);
         _rotator.Tick();
 
-        LimitMovementToRightAndLeftScreenEdge();
-        WrapAroundTopBottomOfScreen();
-
-        BarrierCellIndex = null; 
+        BarrierCellIndex = null;
 
         if (CheckForRectCollision(_collisionRect.Bounds, _barrier.BarriorBounds))
         {
@@ -95,11 +116,10 @@ public class Player : MonoBehaviour
             _mover.Tick();
             _collisionRect.UpdateToTargetPosition();
         }
-        
+
         DebugText.Instance.SetText(_playerInputDTO.ToString() + "\r\nPreviousLastFacing = ");
         if (CheckForRectCollision(_collisionRect.Bounds, _barrier.BarriorBounds))
         {
-
             var offsetVector =
                 CardinalDirections.GetUnitVectorFromCardinalDirection(
                     CardinalDirections.GetOppisiteDirection(_playerInputDTO.Direction)) * .25f;
@@ -115,24 +135,88 @@ public class Player : MonoBehaviour
             }
         }
 
-        FireBulletIfPossible();
+        CheckIfWarlordHitPlayer();
+        CheckIfCannonHitPlayer();
+        DeployCannonIFPossible();
+
+        LimitMovementToRightAndLeftScreenEdge();
+        WrapAroundTopBottomOfScreen();
+
+        if (_cannonDeployed)
+        {
+            FireCannon();
+        }
+        else
+        {
+            FireBulletIfPossible();
+        }
+    }
+
+    private void CheckIfWarlordHitPlayer()
+    {
+        if (CheckForRectCollision(_collisionRect.Bounds, _warlord.Bounds))
+        {
+            switch (Warlord.State)
+            {
+                case WarlordState.Idle:
+                    Debug.Log("Player gets ammo");
+                    break;
+                case WarlordState.ChargeUp:
+                    Debug.Log("Player Killed by Charging Warlord");
+                    break;
+                case WarlordState.LaunchedTowardsPlayer:
+                    Debug.Log("Warlord Hit Player");
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void CheckIfCannonHitPlayer()
+    {
+        if (_cannonShot.HasFired && CheckForRectCollision(_collisionRect.Bounds, _cannonShot.Bounds))
+        {
+            Debug.Log("Cannon Hit Player");
+            _cannonShot.Die();
+        }
+    }
+
+    private void FireCannon()
+    {
+        if (PlayerInput.Inputs.FireButton)
+        {
+            _cannonShot.EnableMover();
+        }
+    }
+
+    private void DeployCannonIFPossible()
+    {
+        if (!_cannonDeployed && transform.position.x <= ScreenHelper.Instance.ScreenBounds.xMin && ammo >= 10)
+        {
+            _cannonDeployed = true;
+            ammo -= 10;
+            _cannonShot.gameObject.SetActive(true);
+            _cannonShot.transform.position =
+                new Vector3(ScreenHelper.Instance.ScreenBounds.xMin + .5f, transform.position.y, 0f);
+        }
     }
 
     private void WrapAroundTopBottomOfScreen()
     {
         var x = transform.position.x;
         var y = transform.position.y;
-        
+
         if (y > ScreenHelper.Instance.ScreenBounds.yMax)
         {
             y = ScreenHelper.Instance.ScreenBounds.yMin;
         }
-        
+
         if (y < ScreenHelper.Instance.ScreenBounds.yMin)
         {
             y = ScreenHelper.Instance.ScreenBounds.yMax;
         }
-        
+
         transform.position = new Vector3(x, y, 0f);
     }
 
@@ -140,12 +224,12 @@ public class Player : MonoBehaviour
     {
         var x = transform.position.x;
         var y = transform.position.y;
-        
+
         if (x > ScreenHelper.Instance.ScreenBounds.xMax)
         {
             x = ScreenHelper.Instance.ScreenBounds.xMax;
         }
-        
+
         if (x < ScreenHelper.Instance.ScreenBounds.xMin)
         {
             x = ScreenHelper.Instance.ScreenBounds.xMin;
@@ -153,16 +237,20 @@ public class Player : MonoBehaviour
 
         transform.position = new Vector3(x, y, 0f);
     }
-    
-    
+
 
     private void FireBulletIfPossible()
     {
-        if (!_bullet.isActiveAndEnabled && PlayerInput.Inputs.FireButton == true)
+        if (_fireBulletCooldownTimer > Time.time || ammo <= 0)
+            return;
+
+        if (!_bullet.isActiveAndEnabled && PlayerInput.Inputs.FireButton == true && _canFireBullet)
         {
             _bullet.FireBullet();
+            _canFireBullet = false;
+            _fireBulletCooldownTimer = Time.time + bulletFireRate;
+            ammo -= 1;
         }
-        
     }
 
     private void EatCell(int cellIndex)
@@ -171,6 +259,7 @@ public class Player : MonoBehaviour
         {
             _barrier.DisableCell(cellIndex);
             _eatTimer = Time.time + eatCooldownTime;
+            ammo += cellAmmoValue;
         }
     }
 
@@ -202,7 +291,7 @@ public class Player : MonoBehaviour
     {
         return originator.Overlaps(targetObject);
     }
-    
+
     private bool HasChangedFacing()
     {
         if (_playerInputDTO.Direction != _playerInputDTO.LastFacingDirection)

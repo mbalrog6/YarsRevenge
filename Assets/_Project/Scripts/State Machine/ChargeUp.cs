@@ -35,6 +35,7 @@ public class ChargeUp : IState
     public void OnEnter()
     {
         _entity.SetTimer(2f);
+        Warlord.State = WarlordState.ChargeUp;
     }
 
     public void OnExit()

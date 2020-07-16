@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class MoveToLeftScreenMover : MonoBehaviour, IMover
+public class MoveToRightScreenMover : MonoBehaviour, IMover
 {
     [SerializeField] private float _speed; 
     private Vector3 _position;
@@ -20,7 +17,7 @@ public class MoveToLeftScreenMover : MonoBehaviour, IMover
 
     public void Tick()
     {
-        _position.y = transform.position.y;
+        _position = transform.position;
         _position.x += _speed * Time.deltaTime;
         transform.position = _position;
     }

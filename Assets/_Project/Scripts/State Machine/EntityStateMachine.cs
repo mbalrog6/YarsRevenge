@@ -2,6 +2,7 @@
 public class EntityStateMachine : MonoBehaviour
 {
     [SerializeField] private Player player;
+    [SerializeField] private Barrier barrier;
 
     private float _timer;
     private StateMachine _stateMachine;
@@ -12,7 +13,7 @@ public class EntityStateMachine : MonoBehaviour
         
         _stateMachine = new StateMachine();
         
-        var idle = new Idle(this, Vector3.zero);
+        var idle = new Idle(this, barrier.transform.GetChild(0));
         var chargeUp = new ChargeUp(this);
         var launchTowardsPlayer = new LaunchTowardsPlayer(this, player);
         

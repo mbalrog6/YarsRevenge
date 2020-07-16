@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
@@ -12,10 +13,13 @@ public class Bullet : MonoBehaviour
     
     public bool HasBeenFired { get; private set; }
 
+    public event Action OnDisabled;
+
     public void DisableBullet()
     {
         HasBeenFired = false;
         gameObject.SetActive(false);
+        OnDisabled?.Invoke();
     }
 
     public void FireBullet()

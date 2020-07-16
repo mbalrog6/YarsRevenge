@@ -13,20 +13,24 @@ public class Barrier : MonoBehaviour
     private BarrierCell[] _cells;
     public Rect BarriorBounds { get; private set; }
 
+    private Transform _warlordSpawnPoint;
+
     private void Awake()
     {
-        WidthOfCell = cellPrefab.transform.localScale.x;
-        HeightOfCell = cellPrefab.transform.localScale.y;
-        
-        if (width < 1)
-            width = 1;
-        if (height < 1)
-            height = 1; 
-        
-        var numberOfCells = width * height;
-        
+        var numberOfCells = CalculateDimensionsBasedOnCellPrefab();
         _cells = new BarrierCell[numberOfCells];
-        
+        FillBarrierWithCells(numberOfCells);
+        CalculateBarriorBounds();
+
+        _warlordSpawnPoint = gameObject.transform.GetChild(0);
+        Vector3 spawnLocalPosition = new Vector3();
+        spawnLocalPosition.x = (WidthOfCell * width) / 2f;
+        spawnLocalPosition.y = (HeightOfCell * height) / 2f;
+        _warlordSpawnPoint.localPosition = spawnLocalPosition;
+    }
+
+    private void FillBarrierWithCells(int numberOfCells)
+    {
         for (int i = 0; i < numberOfCells; i++)
         {
             Vector3 position = DetermineCellPosition(i);
@@ -35,8 +39,20 @@ public class Barrier : MonoBehaviour
             cell.transform.localPosition = position;
             _cells[i] = cell;
         }
+    }
 
-        CalculateBarriorBounds();
+    private int CalculateDimensionsBasedOnCellPrefab()
+    {
+        WidthOfCell = cellPrefab.transform.localScale.x;
+        HeightOfCell = cellPrefab.transform.localScale.y;
+
+        if (width < 1)
+            width = 1;
+        if (height < 1)
+            height = 1;
+
+        var numberOfCells = width * height;
+        return numberOfCells;
     }
 
     private void Update()
