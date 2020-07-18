@@ -9,10 +9,14 @@ public enum WarlordState
 }
 public class Warlord : MonoBehaviour
 {
+    [SerializeField] private int ammoProvided;
+    [SerializeField] private float ammoCooldown;
     public static WarlordState State { get; set; } = WarlordState.Idle;
-    public Rect Bounds => _warlordBounds.Bounds;
+    public bool CanGetAmmo => Time.time > _ammoProvidedTimer;
+    public RectContainer WarlordRectContainer => _warlordBounds;
 
     private RectContainer _warlordBounds;
+    private float _ammoProvidedTimer;
 
     private void Awake()
     {
@@ -23,7 +27,13 @@ public class Warlord : MonoBehaviour
     {
         _warlordBounds.UpdateToTargetPosition();
     }
-    
+
+    public int GetAmmo()
+    {
+        _ammoProvidedTimer = Time.time + ammoCooldown;
+        return ammoProvided;
+    }
+
     private void OnDrawGizmos()
     {
         if (_warlordBounds == null) return;

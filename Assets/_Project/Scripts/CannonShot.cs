@@ -5,6 +5,7 @@ using UnityEngine;
 public class CannonShot : MonoBehaviour
 {
     [SerializeField] private Barrier barrier;
+    [SerializeField] private Probe probe;
     [SerializeField] private Transform[] contactPoints;
 
     private RectContainer _collisionRect;
@@ -15,6 +16,7 @@ public class CannonShot : MonoBehaviour
     public bool HasFired { get; private set; }
     public CardinalDirection Direction { get; private set; }
     public Rect Bounds => _collisionRect.Bounds;
+    public RectContainer CannonRectContainer => _collisionRect;
 
     public event Action OnDie; 
 
@@ -41,7 +43,7 @@ public class CannonShot : MonoBehaviour
 
     private void CheckForCollisions()
     {
-        if (_collisionRect.Bounds.Overlaps(barrier.BarriorBounds))
+        if (_collisionRect.Bounds.Overlaps(barrier.BarrierRectContainer.Bounds))
         {
             CheckCannonShotContactPointsForBarriorCollision(contactPoints, Vector3.zero);
             if (_cellIndexs.Count > 0)
@@ -54,8 +56,17 @@ public class CannonShot : MonoBehaviour
                 Die();
             }
         }
+
+        if (!probe.IsDead)
+        {
+            if (_collisionRect.Bounds.Overlaps(probe.ProbeRectContainer.Bounds))
+            {
+                Die();
+                probe.Die();
+            }
+        }
     }
-    
+
     private void CheckCannonShotContactPointsForBarriorCollision(Transform[] contactPoints, Vector3 offset)
     {
         _cellIndexs.Clear();

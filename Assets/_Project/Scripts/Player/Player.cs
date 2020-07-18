@@ -1,5 +1,4 @@
-﻿using System.Timers;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Player : MonoBehaviour
 {
@@ -7,6 +6,7 @@ public class Player : MonoBehaviour
     [SerializeField] private Bullet _bullet;
     [SerializeField] private CannonShot _cannonShot;
     [SerializeField] private Warlord _warlord;
+    [SerializeField] private Probe _probe; 
 
     [SerializeField] private float movementSpeed;
     [SerializeField] private Transform[] _frontContactPoints;
@@ -15,6 +15,7 @@ public class Player : MonoBehaviour
     [SerializeField] private float _reboundDistance = 0.1f;
     [SerializeField] private float bulletFireRate = .2f;
     [SerializeField] private int cellAmmoValue = 2;
+    [SerializeField] private float radius;
 
     public Vector3 DirectionVector =>
         CardinalDirections.GetUnitVectorFromCardinalDirection(PlayerInputDTO.Direction);
@@ -32,19 +33,20 @@ public class Player : MonoBehaviour
     public InputDTO PlayerInputDTO => _playerInputDTO;
 
     private Vector3 _startPosition;
+    private InputDTO _playerInputDTO;
     private IMover _mover;
     private IRotator _rotator;
-    private RectContainer _collisionRect;
+    private RectContainer _playerRectContainer;
+    private PlayerCollisions _playerCollisions;
     private float _eatTimer;
     private int? BarrierCellIndex;
-    private InputDTO _playerInputDTO;
-    private float delayTimer = 0f;
     private bool _canFireBullet;
     private float _fireBulletCooldownTimer;
     private bool _cannonDeployed;
-
-
     private int ammo = 0;
+    
+    private float delayTimer = 0f;
+    private float _warlordAmmoTimer;
 
 
     private void Awake()
@@ -54,13 +56,24 @@ public class Player : MonoBehaviour
         PlayerInput = new PlayerInput();
         _mover = new KineticMover(this);
         _rotator = new DirectionalRotator(this);
-
-        _bullet.DisableBullet();
+        
         _canFireBullet = true;
         _fireBulletCooldownTimer = 0f;
 
         _bullet.OnDisabled += Handle_BulletDisabled;
         _cannonShot.OnDie += Handle_CannonShotOnDie;
+    }
+
+    private void Start()
+    {
+        _playerCollisions = new PlayerCollisions(_playerRectContainer);
+        _playerCollisions.AddEntityRect(EntityCast.Cannon, _cannonShot.CannonRectContainer);
+        _playerCollisions.AddEntityRect(EntityCast.Barrier, _barrier.BarrierRectContainer);
+        _playerCollisions.AddEntityRect(EntityCast.Warlord, _warlord.WarlordRectContainer);
+        _playerCollisions.AddEntityRect(EntityCast.Probe, _probe.ProbeRectContainer);
+        
+        _bullet.DisableBullet();
+        _cannonShot.gameObject.SetActive(false);
     }
 
     private void Handle_CannonShotOnDie()
@@ -75,7 +88,7 @@ public class Player : MonoBehaviour
 
     private void OnValidate()
     {
-        _collisionRect = new RectContainer(this.gameObject, 10, 10, 1f, 1f);
+        _playerRectContainer = new RectContainer(this.gameObject, 10, 10, 1f, 1f);
     }
 
     private void Update()
@@ -95,46 +108,15 @@ public class Player : MonoBehaviour
 
         BarrierCellIndex = null;
 
-        if (CheckForRectCollision(_collisionRect.Bounds, _barrier.BarriorBounds))
-        {
-            if (HasChangedFacing())
-            {
-                BarrierCellIndex = CheckPlayerContactPointsForBarriorCollision(_backContactPoints, Vector3.zero);
-                if (BarrierCellIndex.HasValue)
-                {
-                    _barrier.SetCellColor(BarrierCellIndex.Value, Color.magenta);
-                    _playerInputDTO.Direction = _playerInputDTO.LastFacingDirection;
-                    PlayerInput.SetInput(_playerInputDTO);
-                    _rotator.Tick();
-                    _collisionRect.UpdateToTargetPosition();
-                }
-            }
-        }
+        ResolvePlayerTurnInBarrierRect();
 
         if (!BarrierCellIndex.HasValue)
         {
             _mover.Tick();
-            _collisionRect.UpdateToTargetPosition();
+            _playerRectContainer.UpdateToTargetPosition();
         }
-
-        DebugText.Instance.SetText(_playerInputDTO.ToString() + "\r\nPreviousLastFacing = ");
-        if (CheckForRectCollision(_collisionRect.Bounds, _barrier.BarriorBounds))
-        {
-            var offsetVector =
-                CardinalDirections.GetUnitVectorFromCardinalDirection(
-                    CardinalDirections.GetOppisiteDirection(_playerInputDTO.Direction)) * .25f;
-            BarrierCellIndex = CheckPlayerContactPointsForBarriorCollision(_frontContactPoints, offsetVector);
-            if (BarrierCellIndex.HasValue)
-            {
-                transform.position = _startPosition +
-                                     (CardinalDirections.GetUnitVectorFromCardinalDirection(_playerInputDTO.Direction) *
-                                      -_reboundDistance);
-
-                EatCell(BarrierCellIndex.Value);
-                _collisionRect.UpdateToTargetPosition();
-            }
-        }
-
+        
+        DidPlayerHitBarrierCell();
         CheckIfWarlordHitPlayer();
         CheckIfCannonHitPlayer();
         DeployCannonIFPossible();
@@ -150,16 +132,79 @@ public class Player : MonoBehaviour
         {
             FireBulletIfPossible();
         }
+
+        CheckIfPlayerHitProbe();
+    }
+
+    private void CheckIfPlayerHitProbe()
+    {
+        if (_probe.IsDead)
+            return;
+        
+        if (_playerCollisions.CheckPlayerRadiusWithinEntityRadius(EntityCast.Probe, radius, _probe.Radius))
+        {
+            _probe.Die();
+        }
+    }
+
+    private void ResolvePlayerTurnInBarrierRect()
+    {
+        if (_playerCollisions.CheckIfPlayerHit(EntityCast.Barrier))
+        {
+            if (HasChangedFacing())
+            {
+                BarrierCellIndex = CheckPlayerContactPointsForBarriorCollision(_backContactPoints, Vector3.zero);
+                if (BarrierCellIndex.HasValue)
+                {
+                    
+                    _barrier.SetCellColor(BarrierCellIndex.Value, Color.magenta);
+                    var offsetVector =
+                        CardinalDirections.GetUnitVectorFromCardinalDirection(
+                            CardinalDirections.GetOppisiteDirection(_playerInputDTO.Direction)) * .25f;
+                    BarrierCellIndex = CheckPlayerContactPointsForBarriorCollision(_frontContactPoints, offsetVector);
+                    if (BarrierCellIndex.HasValue)
+                    {
+                        _playerInputDTO.Direction = _playerInputDTO.LastFacingDirection;
+                        PlayerInput.SetInput(_playerInputDTO);
+                        _rotator.Tick();
+                        _playerRectContainer.UpdateToTargetPosition();
+                    }
+                }
+            }
+        }
+    }
+
+    private void DidPlayerHitBarrierCell()
+    {
+        if (_playerCollisions.CheckIfPlayerHit(EntityCast.Barrier))
+        {
+            var offsetVector =
+                CardinalDirections.GetUnitVectorFromCardinalDirection(
+                    CardinalDirections.GetOppisiteDirection(_playerInputDTO.Direction)) * .25f;
+            BarrierCellIndex = CheckPlayerContactPointsForBarriorCollision(_frontContactPoints, offsetVector);
+            if (BarrierCellIndex.HasValue)
+            {
+                transform.position = _startPosition +
+                                     (CardinalDirections.GetUnitVectorFromCardinalDirection(_playerInputDTO.Direction) *
+                                      -_reboundDistance);
+
+                EatCell(BarrierCellIndex.Value);
+                _playerRectContainer.UpdateToTargetPosition();
+            }
+        }
     }
 
     private void CheckIfWarlordHitPlayer()
     {
-        if (CheckForRectCollision(_collisionRect.Bounds, _warlord.Bounds))
+        if (_playerCollisions.CheckIfPlayerHit(EntityCast.Warlord))
         {
             switch (Warlord.State)
             {
                 case WarlordState.Idle:
-                    Debug.Log("Player gets ammo");
+                    if (_warlord.CanGetAmmo)
+                    {
+                        ammo += _warlord.GetAmmo();
+                    }
                     break;
                 case WarlordState.ChargeUp:
                     Debug.Log("Player Killed by Charging Warlord");
@@ -175,7 +220,7 @@ public class Player : MonoBehaviour
 
     private void CheckIfCannonHitPlayer()
     {
-        if (_cannonShot.HasFired && CheckForRectCollision(_collisionRect.Bounds, _cannonShot.Bounds))
+        if (_cannonShot.HasFired && _playerCollisions.CheckIfPlayerHit(EntityCast.Cannon))    
         {
             Debug.Log("Cannon Hit Player");
             _cannonShot.Die();
@@ -287,33 +332,29 @@ public class Player : MonoBehaviour
         return hit;
     }
 
-    private bool CheckForRectCollision(Rect originator, Rect targetObject)
-    {
-        return originator.Overlaps(targetObject);
-    }
-
     private bool HasChangedFacing()
     {
         if (_playerInputDTO.Direction != _playerInputDTO.LastFacingDirection)
         {
             return true;
         }
-
         return false;
     }
 
     private void OnDrawGizmos()
     {
-        if (_collisionRect == null) return;
+        if (_playerRectContainer == null) return;
 
         Gizmos.color = Color.blue;
-        Gizmos.DrawLine(new Vector3(_collisionRect.Bounds.xMin, _collisionRect.Bounds.yMin, 0f),
-            new Vector3(_collisionRect.Bounds.xMin, _collisionRect.Bounds.yMax, 0f));
-        Gizmos.DrawLine(new Vector3(_collisionRect.Bounds.xMax, _collisionRect.Bounds.yMin, 0f),
-            new Vector3(_collisionRect.Bounds.xMax, _collisionRect.Bounds.yMax, 0f));
-        Gizmos.DrawLine(new Vector3(_collisionRect.Bounds.xMin, _collisionRect.Bounds.yMin, 0f),
-            new Vector3(_collisionRect.Bounds.xMax, _collisionRect.Bounds.yMin, 0f));
-        Gizmos.DrawLine(new Vector3(_collisionRect.Bounds.xMin, _collisionRect.Bounds.yMax, 0f),
-            new Vector3(_collisionRect.Bounds.xMax, _collisionRect.Bounds.yMax, 0f));
+        Gizmos.DrawLine(new Vector3(_playerRectContainer.Bounds.xMin, _playerRectContainer.Bounds.yMin, 0f),
+            new Vector3(_playerRectContainer.Bounds.xMin, _playerRectContainer.Bounds.yMax, 0f));
+        Gizmos.DrawLine(new Vector3(_playerRectContainer.Bounds.xMax, _playerRectContainer.Bounds.yMin, 0f),
+            new Vector3(_playerRectContainer.Bounds.xMax, _playerRectContainer.Bounds.yMax, 0f));
+        Gizmos.DrawLine(new Vector3(_playerRectContainer.Bounds.xMin, _playerRectContainer.Bounds.yMin, 0f),
+            new Vector3(_playerRectContainer.Bounds.xMax, _playerRectContainer.Bounds.yMin, 0f));
+        Gizmos.DrawLine(new Vector3(_playerRectContainer.Bounds.xMin, _playerRectContainer.Bounds.yMax, 0f),
+            new Vector3(_playerRectContainer.Bounds.xMax, _playerRectContainer.Bounds.yMax, 0f));
+        
+        Gizmos.DrawWireSphere( transform.position, radius);
     }
 }

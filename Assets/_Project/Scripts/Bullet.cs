@@ -50,7 +50,7 @@ public class Bullet : MonoBehaviour
 
     private void CheckForCollisionWithBarrior()
     {
-        var collision = barrier.BarriorBounds.Contains(transform.position);
+        var collision = barrier.BarrierRectContainer.Bounds.Contains(transform.position);
         if (collision)
         {
             var index = barrier.GetCellFromVector3(transform.position);
