@@ -3,7 +3,7 @@
     None,
     SnakeDown, 
     SnakeUp, 
-    BubbleFoward,
+    BubbleForward,
 }
 
 public class BarrierCellShifter : IShifter
@@ -22,12 +22,9 @@ public class BarrierCellShifter : IShifter
     private int index;
     private bool currentValue;
     private bool beginValue;
-
     private bool lastValue;
-
     private bool nextValue;
-
-
+    
     public BarrierCellShifter(Barrier barrier, ref BarrierCell[] cellArray, int width, int height)
     {
         _barrier = barrier;
@@ -44,7 +41,7 @@ public class BarrierCellShifter : IShifter
         {
             case BarrierShiftPatterns.None:
                 break;
-            case BarrierShiftPatterns.BubbleFoward:
+            case BarrierShiftPatterns.BubbleForward:
                 BubbleForward();
                 break;
             case BarrierShiftPatterns.SnakeDown:

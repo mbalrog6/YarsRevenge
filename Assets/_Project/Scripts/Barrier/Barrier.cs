@@ -32,28 +32,20 @@ public class Barrier : MonoBehaviour, IBarrier
         _timer = Time.time + rotationPulseTime;
         _mover = new OsalateMover(this.gameObject,5f,  -5f, 3f );
         _shifter = new BarrierCellShifter(this, ref _cells, width, height);
-        _shifter.Pattern = BarrierShiftPatterns.BubbleFoward;
+        _shifter.Pattern = BarrierShiftPatterns.SnakeUp;
     }
 
     private void Update()
     {
         //_mover.Tick();
-        var text = GetCellFromVector3(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-        if (text.HasValue)
-        {
-            SetCellColor(text.Value, Color.yellow);
-        }
-
         var position = transform.position + _rectOffset;
         _barrierRectContainer.UpdatePosition(position);
 
         if (Time.time > _timer)
         {
             _shifter.Tick();
-            //rotateCellsDown();
             _timer = Time.time + rotationPulseTime;
         }
-        
     }
 
     private void CalculateWarlordSpawnOffset()
@@ -196,185 +188,7 @@ public class Barrier : MonoBehaviour, IBarrier
 
         return index;
     }
-
-    private void rotateCells()
-    {
-        var index = 0;
-        var currentValue = false;
-        var lastValue = false;
-        var beginValue = false; 
-        var nextValue = false;
-
-        for (int y = 0; y < height; y++)
-        {
-            if (y == 0)
-            {
-                index = GetWrapAroundIndexForBarrier();
-                currentValue = IsCellActive(index);
-                index = 0; 
-            }
-            else
-            {
-                index = y * width;
-                currentValue = IsCellActive(index);
-            }
-
-            if (y % 2 == 0)
-            {
-                lastValue = ShiftCellToRight(index, beginValue, currentValue, lastValue);
-                
-            }
-            else
-            {
-                beginValue = ShiftCellToLeft(index, lastValue, beginValue);
-            }
-        }
-        
-    }
     
-    private int GetWrapAroundIndexForBarrier()
-    {
-        int index;
-        if (height % 2 == 0)
-        {
-            index = _cells.Length - width;
-        }
-        else
-        {
-            index = _cells.Length - 1;
-        }
-
-        return index;
-    }
-
-    private bool ShiftCellToLeft(int index, bool lastValue, bool beginValue)
-    {
-        for (int x = 0; x < width; x++)
-        {
-            if (x == width - 1)
-            {
-                SetCellActive(index, lastValue);
-            }
-            else
-            {
-                if (x == 0)
-                {
-                    beginValue = IsCellActive(index);
-                }
-
-                SetCellActive(index, IsCellActive(index + 1));
-            }
-
-            index++;
-        }
-
-        return beginValue;
-    }
-
-    private bool ShiftCellToRight(int index, bool beginValue, bool currentValue, bool lastValue)
-    {
-        bool nextValue;
-        for (int x = 0; x < width; x++)
-        {
-            nextValue = IsCellActive(index);
-            if (x == 0 && index != 0)
-            {
-                SetCellActive(index, beginValue);
-            }
-            else
-            {
-                SetCellActive(index, currentValue);
-            }
-
-            index++;
-
-            currentValue = nextValue;
-            lastValue = currentValue;
-        }
-
-        return lastValue;
-    }
-
-    private void rotateCellsDown()
-    {
-        var index = 0;
-        var currentValue = false;
-        var lastValue = false;
-        var beginValue = false; 
-        var nextValue = false;
-
-        for (int y = height-1; y >= 0; y--)
-        {
-            if (y == height-1)
-            {
-                index = width - 1;
-                beginValue = IsCellActive(index);
-                lastValue = beginValue;
-                index = y * width;
-            }
-            else
-            {
-                index = y * width;
-                currentValue = IsCellActive(index);
-            }
-
-            
-            if (y % 2 == 0)
-            {
-                lastValue = ShiftCellToRightDown(index, beginValue, currentValue, lastValue);
-                
-            }
-            else
-            {
-                beginValue = ShiftCellToLeft(index, lastValue, beginValue);
-            }
-            
-        }
-        
-    }
-    
-    private bool ShiftCellToRightDown(int index, bool beginValue, bool currentValue, bool lastValue)
-    {
-        bool nextValue;
-        for (int x = 0; x < width; x++)
-        {
-            nextValue = IsCellActive(index);
-            if (x == 0 && index != width - 1)
-            {
-                SetCellActive(index, beginValue);
-            }
-            else
-            {
-                SetCellActive(index, currentValue);
-            }
-
-            index++;
-
-            currentValue = nextValue;
-            lastValue = currentValue;
-        }
-
-        return lastValue;
-    }
-
-    private void BubleCellsForward()
-    {
-        int index;
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = width - 1; x > 0; x--)
-            {
-                index = y*width + x;
-                if (IsCellActive(index) == true && IsCellActive(index - 1) == false)
-                    {
-                        SetCellActive(index-1,true);
-                        SetCellActive(index, false);
-                    }
-            }
-            
-        }
-    }
-
     private void OnDrawGizmos()
     {
         if (_barrierRectContainer == null)
