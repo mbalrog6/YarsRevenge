@@ -9,11 +9,15 @@ public class ChargeUp : IState
     private float _flickerRate = .1f;
     private float _timer;
     private bool _colorChoice;
-    private Material _material; 
+    private Material _material;
+    private Transform _transform;
+    private Transform _targetTransform; 
     
-    public ChargeUp(EntityStateMachine entity)
+    public ChargeUp(EntityStateMachine entity, Transform target)
     {
         _entity = entity;
+        _transform = entity.transform;
+        _targetTransform = target;
         _color1 = Color.magenta;
         _color2 = Color.white;
         _timer = Time.time + _timer;
@@ -29,6 +33,7 @@ public class ChargeUp : IState
         }
 
         _material.color = _colorChoice ? _color1 : _color2;
+        _transform.position = _targetTransform.position;
 
     }
 

@@ -180,16 +180,27 @@ public class Player : MonoBehaviour
         {
             var offsetVector =
                 CardinalDirections.GetUnitVectorFromCardinalDirection(
-                    CardinalDirections.GetOppisiteDirection(_playerInputDTO.Direction)) * .25f;
+                    CardinalDirections.GetOppisiteDirection(_playerInputDTO.Direction)) * .2f;
             BarrierCellIndex = CheckPlayerContactPointsForBarriorCollision(_frontContactPoints, offsetVector);
             if (BarrierCellIndex.HasValue)
             {
                 transform.position = _startPosition +
-                                     (CardinalDirections.GetUnitVectorFromCardinalDirection(_playerInputDTO.Direction) *
-                                      -_reboundDistance);
-
+                                     CardinalDirections.GetUnitVectorFromCardinalDirection(
+                                         CardinalDirections.GetOppisiteDirection(_playerInputDTO.LastFacingDirection)) * _reboundDistance;
                 EatCell(BarrierCellIndex.Value);
                 _playerRectContainer.UpdateToTargetPosition();
+            }
+            else
+            {
+                offsetVector =
+                    CardinalDirections.GetUnitVectorFromCardinalDirection(_playerInputDTO.Direction) * .2f;
+                BarrierCellIndex = CheckPlayerContactPointsForBarriorCollision(_backContactPoints, offsetVector);
+                if (BarrierCellIndex.HasValue)
+                {
+                    transform.position = _startPosition +
+                                         CardinalDirections.GetUnitVectorFromCardinalDirection(_playerInputDTO.LastFacingDirection) * _reboundDistance;
+                    _playerRectContainer.UpdateToTargetPosition();
+                }
             }
         }
     }

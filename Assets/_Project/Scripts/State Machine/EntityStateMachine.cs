@@ -14,7 +14,7 @@ public class EntityStateMachine : MonoBehaviour
         _stateMachine = new StateMachine();
         
         var idle = new Idle(this, barrier.transform.GetChild(0));
-        var chargeUp = new ChargeUp(this);
+        var chargeUp = new ChargeUp(this, barrier.transform.GetChild(0));
         var launchTowardsPlayer = new LaunchTowardsPlayer(this, player);
         
         _stateMachine.AddState(idle);
