@@ -6,6 +6,7 @@ public class StateMachine
 {
     private IState _currentState;
     private List<IState> _states = new List<IState>();
+    private List<StateTransition> _anyStateTransitions =  new List<StateTransition>();
     private Dictionary<IState, List<StateTransition>> _stateTransitons = new Dictionary<IState, List<StateTransition>>();
 
     public void Tick()
@@ -20,6 +21,17 @@ public class StateMachine
 
     private StateTransition CheckForTransition()
     {
+        if (_anyStateTransitions.Count > 0)
+        {
+            foreach (var transition in _anyStateTransitions)
+            {
+                if (transition.Condition() == true)
+                {
+                    return transition;
+                }
+            }
+        }
+        
         if (_stateTransitons.ContainsKey(_currentState))
         {
             foreach (var transition in _stateTransitons[_currentState])
@@ -48,6 +60,12 @@ public class StateMachine
 
         var transition = new StateTransition(from, to, condition);
         _stateTransitons[from].Add(transition);
+    }
+
+    public void AddAnyStateTransition(IState to, Func<bool> condition)
+    {
+        var transition = new StateTransition(null, to, condition);
+        _anyStateTransitions.Add(transition);
     }
 
     public void SetState(IState state)

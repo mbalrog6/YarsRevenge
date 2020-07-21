@@ -5,8 +5,10 @@ public class Barrier : MonoBehaviour, IBarrier
     [SerializeField] private GameObject cellPrefab;
     [SerializeField] private int width;
     [SerializeField] private int height;
-    [SerializeField] private float rotationPulseTime = .5f; 
+    [SerializeField] private float rotationPulseTime = .5f;
 
+    public int Score(int index) => _cells[index].Score;
+    public bool IsReflective => true; 
     public float WidthOfCell { get; private set; }
     public float HeightOfCell { get; private set; }
     public bool IsCellActive(int index) => _cells[index].isActiveAndEnabled;
@@ -37,7 +39,7 @@ public class Barrier : MonoBehaviour, IBarrier
 
     private void Update()
     {
-        //_mover.Tick();
+        _mover.Tick();
         var position = transform.position + _rectOffset;
         _barrierRectContainer.UpdatePosition(position);
 

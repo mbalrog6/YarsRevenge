@@ -11,9 +11,12 @@ public class Warlord : MonoBehaviour
 {
     [SerializeField] private int ammoProvided;
     [SerializeField] private float ammoCooldown;
+    [SerializeField] private int _scoreForSwirl;
+    [SerializeField] private int _scoreForWarlord;
     public static WarlordState State { get; set; } = WarlordState.Idle;
     public bool CanGetAmmo => Time.time > _ammoProvidedTimer;
     public RectContainer WarlordRectContainer => _warlordBounds;
+    public int Score => Warlord.State == WarlordState.LaunchedTowardsPlayer ? _scoreForSwirl : _scoreForWarlord;
 
     private RectContainer _warlordBounds;
     private float _ammoProvidedTimer;
@@ -32,6 +35,11 @@ public class Warlord : MonoBehaviour
     {
         _ammoProvidedTimer = Time.time + ammoCooldown;
         return ammoProvided;
+    }
+
+    public void Die()
+    {
+        State = WarlordState.Dead;
     }
 
     private void OnDrawGizmos()

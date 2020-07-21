@@ -16,14 +16,18 @@ public class EntityStateMachine : MonoBehaviour
         var idle = new Idle(this, barrier.transform.GetChild(0));
         var chargeUp = new ChargeUp(this, barrier.transform.GetChild(0));
         var launchTowardsPlayer = new LaunchTowardsPlayer(this, player);
+        var dead = new Died(GetComponent<Warlord>());
         
         _stateMachine.AddState(idle);
         _stateMachine.AddState(chargeUp);
         _stateMachine.AddState(launchTowardsPlayer);
+        _stateMachine.AddState(dead);
 
         _stateMachine.AddTransition(idle, chargeUp, () => Time.time > _timer);
         _stateMachine.AddTransition(chargeUp, launchTowardsPlayer, () => Time.time > _timer);
         _stateMachine.AddTransition(launchTowardsPlayer, idle, () => Time.time > _timer);
+        
+        _stateMachine.AddAnyStateTransition(dead, () => Warlord.State == WarlordState.Dead);
         
         _stateMachine.SetState(idle);
     }

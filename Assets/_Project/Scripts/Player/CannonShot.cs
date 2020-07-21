@@ -6,10 +6,11 @@ public class CannonShot : MonoBehaviour
 {
     [SerializeField] private Barrier barrier;
     [SerializeField] private Probe probe;
+    [SerializeField] private Warlord warlord;
     [SerializeField] private Transform[] contactPoints;
 
     private RectContainer _collisionRect;
-    private MoveToRightScreenMover _mover;
+    private DirectionalMover _mover;
     private MirrorTargetYMover _yMover;
     private HashSet<int> _cellIndexs = new HashSet<int>();
 
@@ -23,7 +24,7 @@ public class CannonShot : MonoBehaviour
     private void Awake()
     {
         _collisionRect = new RectContainer( gameObject, transform.position.x, transform.position.y, .8f, .5f );
-        _mover = GetComponentInChildren<MoveToRightScreenMover>();
+        _mover = GetComponentInChildren<DirectionalMover>();
         _yMover = GetComponentInChildren<MirrorTargetYMover>();
         HasFired = false;
         Direction = CardinalDirection.EAST;
@@ -39,6 +40,15 @@ public class CannonShot : MonoBehaviour
         }
 
         CheckForCollisions();
+        CheckOffScreen();
+    }
+
+    private void CheckOffScreen()
+    {
+        if (!ScreenHelper.Instance.ScreenBounds.Contains(transform.position))
+        {
+            Die();
+        }
     }
 
     private void CheckForCollisions()
@@ -50,10 +60,19 @@ public class CannonShot : MonoBehaviour
             {
                 foreach (var index in _cellIndexs)
                 {
+                    GameManager.Instance.AddScore(barrier.Score(index));
                     barrier.DisableCell(index);
                 }
 
-                Die();
+                if (barrier.IsReflective)
+                {
+                    Direction = CardinalDirection.WEST;
+                    _mover.Direction = Direction;
+                }
+                else
+                {
+                    Die();
+                }
             }
         }
 
@@ -63,7 +82,18 @@ public class CannonShot : MonoBehaviour
             {
                 Die();
                 probe.Die();
+                GameManager.Instance.AddScore(probe.Score);
             }
+        }
+
+        if (!HasFired)
+            return; 
+        
+        if (_collisionRect.Bounds.Overlaps(warlord.WarlordRectContainer.Bounds))
+        {
+            GameManager.Instance.AddScore(warlord.Score);
+            Die();
+            warlord.Die();
         }
     }
 
@@ -96,6 +126,7 @@ public class CannonShot : MonoBehaviour
         _yMover.enabled = false;
         HasFired = true;
         Direction = CardinalDirection.EAST;
+        _mover.Direction = CardinalDirection.EAST;
     }
 
     public void Die()
@@ -104,6 +135,7 @@ public class CannonShot : MonoBehaviour
         _yMover.enabled = true;
         HasFired = false;
         Direction = CardinalDirection.EAST;
+        _mover.Direction = CardinalDirection.EAST;
         OnDie?.Invoke(); 
         gameObject.SetActive(false);
     }

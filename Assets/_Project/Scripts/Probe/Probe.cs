@@ -6,6 +6,7 @@ public class Probe : MonoBehaviour
     [SerializeField] private float radius;
     [SerializeField] private Warlord warlord;
     [SerializeField] private float respawnTimer;
+    [SerializeField] private int _ScoreValue; 
 
     public event Action OnDie;
     public event Action OnRespawn;
@@ -13,6 +14,7 @@ public class Probe : MonoBehaviour
     public RectContainer ProbeRectContainer => _probeRectContainer;
     public bool IsDead => _isDead; 
     public float Radius => radius;
+    public int Score => _ScoreValue;
 
     private bool _isDead;
     private RectContainer _probeRectContainer;

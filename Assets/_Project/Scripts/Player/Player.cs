@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class Player : MonoBehaviour
 {
@@ -16,6 +17,8 @@ public class Player : MonoBehaviour
     [SerializeField] private float bulletFireRate = .2f;
     [SerializeField] private int cellAmmoValue = 2;
     [SerializeField] private float radius;
+    
+    public event Action OnDie;
 
     public Vector3 DirectionVector =>
         CardinalDirections.GetUnitVectorFromCardinalDirection(PlayerInputDTO.Direction);
@@ -144,6 +147,7 @@ public class Player : MonoBehaviour
         if (_playerCollisions.CheckPlayerRadiusWithinEntityRadius(EntityCast.Probe, radius, _probe.Radius))
         {
             _probe.Die();
+            Die();
         }
     }
 
@@ -218,10 +222,10 @@ public class Player : MonoBehaviour
                     }
                     break;
                 case WarlordState.ChargeUp:
-                    Debug.Log("Player Killed by Charging Warlord");
+                    Die();
                     break;
                 case WarlordState.LaunchedTowardsPlayer:
-                    Debug.Log("Warlord Hit Player");
+                    Die();
                     break;
                 default:
                     break;
@@ -233,7 +237,14 @@ public class Player : MonoBehaviour
     {
         if (_cannonShot.HasFired && _playerCollisions.CheckIfPlayerHit(EntityCast.Cannon))    
         {
-            Debug.Log("Cannon Hit Player");
+            if (_cannonShot.Direction == CardinalDirection.EAST)
+            {
+                Die();
+            }
+            else
+            {
+                ammo += 10; 
+            }
             _cannonShot.Die();
         }
     }
@@ -316,6 +327,7 @@ public class Player : MonoBehaviour
             _barrier.DisableCell(cellIndex);
             _eatTimer = Time.time + eatCooldownTime;
             ammo += cellAmmoValue;
+            GameManager.Instance.AddScore(_barrier.Score(cellIndex));
         }
     }
 
@@ -341,6 +353,13 @@ public class Player : MonoBehaviour
         }
 
         return hit;
+    }
+
+    void Die()
+    {
+        Debug.Log("Player Died");
+        GameManager.Instance.KillPlayer();
+        OnDie?.Invoke();
     }
 
     private bool HasChangedFacing()
