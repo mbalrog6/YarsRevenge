@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using TMPro;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -7,7 +9,8 @@ public class Player : MonoBehaviour
     [SerializeField] private Bullet _bullet;
     [SerializeField] private CannonShot _cannonShot;
     [SerializeField] private Warlord _warlord;
-    [SerializeField] private Probe _probe; 
+    [SerializeField] private Probe _probe;
+    [SerializeField] private IonZone _ionZone;
 
     [SerializeField] private float movementSpeed;
     [SerializeField] private Transform[] _frontContactPoints;
@@ -17,6 +20,11 @@ public class Player : MonoBehaviour
     [SerializeField] private float bulletFireRate = .2f;
     [SerializeField] private int cellAmmoValue = 2;
     [SerializeField] private float radius;
+
+    [Header("Audio")] [SerializeField] private SimpleAudioEvent shotSound;
+    [SerializeField] private SimpleAudioEvent eatSound;
+    [SerializeField] private SimpleAudioEvent dieSound;
+    [SerializeField] private SimpleAudioEvent ionCloudAudio;
     
     public event Action OnDie;
 
@@ -50,6 +58,10 @@ public class Player : MonoBehaviour
     
     private float delayTimer = 0f;
     private float _warlordAmmoTimer;
+    private bool _playerDead = false;
+    private AudioSource _audioSource;
+    private AudioSource _buzzSound;
+    private AudioSource _ionCloud;
 
 
     private void Awake()
@@ -65,6 +77,10 @@ public class Player : MonoBehaviour
 
         _bullet.OnDisabled += Handle_BulletDisabled;
         _cannonShot.OnDie += Handle_CannonShotOnDie;
+
+        _audioSource = GetComponents<AudioSource>()[0];
+        _buzzSound = GetComponents<AudioSource>()[1];
+        _ionCloud = gameObject.AddComponent<AudioSource>();
     }
 
     private void Start()
@@ -96,6 +112,9 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        if (GameManager.Instance.IsPaused)
+            return; 
+        
         if (Time.time < delayTimer)
         {
             return;
@@ -108,6 +127,16 @@ public class Player : MonoBehaviour
         PlayerInput.Tick();
         PlayerInput.CopyDTO(ref _playerInputDTO);
         _rotator.Tick();
+
+        if (PlayerInputDTO.Direction != CardinalDirection.NONE)
+        {
+            if(!_buzzSound.isPlaying)
+                dieSound.Play(_buzzSound);
+        }
+        else
+        {
+            _buzzSound.Stop();
+        }
 
         BarrierCellIndex = null;
 
@@ -137,16 +166,36 @@ public class Player : MonoBehaviour
         }
 
         CheckIfPlayerHitProbe();
+        PlayIonSound();
+
+    }
+
+    private void PlayIonSound()
+    {
+        if (_playerCollisions.CheckIfPlayerHit(_ionZone.IonRectContainer))
+        {
+            if( !_ionCloud.isPlaying )
+                ionCloudAudio.Play(_ionCloud);
+        }
+        else
+        {
+            _ionCloud.Stop();
+        }
     }
 
     private void CheckIfPlayerHitProbe()
     {
-        if (_probe.IsDead)
+        if (_probe.IsDead || _playerDead)
             return;
+
+        if (_probe.ProbeRectContainer.Bounds.Overlaps(_ionZone.IonRectContainer.Bounds))
+        {
+            return;
+        }
         
         if (_playerCollisions.CheckPlayerRadiusWithinEntityRadius(EntityCast.Probe, radius, _probe.Radius))
         {
-            _probe.Die();
+            //_probe.Die();
             Die();
         }
     }
@@ -211,6 +260,9 @@ public class Player : MonoBehaviour
 
     private void CheckIfWarlordHitPlayer()
     {
+        if (_playerDead == true)
+            return; 
+        
         if (_playerCollisions.CheckIfPlayerHit(EntityCast.Warlord))
         {
             switch (Warlord.State)
@@ -251,9 +303,9 @@ public class Player : MonoBehaviour
 
     private void FireCannon()
     {
-        if (PlayerInput.Inputs.FireButton)
+        if (PlayerInput.Inputs.FireButton && !_cannonShot.HasFired)
         {
-            _cannonShot.EnableMover();
+            _cannonShot.Fire();
         }
     }
 
@@ -317,6 +369,8 @@ public class Player : MonoBehaviour
             _canFireBullet = false;
             _fireBulletCooldownTimer = Time.time + bulletFireRate;
             ammo -= 1;
+            
+            shotSound.PlayOneShot(_audioSource);
         }
     }
 
@@ -329,6 +383,7 @@ public class Player : MonoBehaviour
             ammo += cellAmmoValue;
             GameManager.Instance.AddScore(_barrier.Score(cellIndex));
         }
+        eatSound.Play(_audioSource);
     }
 
     private int? CheckPlayerContactPointsForBarriorCollision(Transform[] contactPoints, Vector3 offset)
@@ -358,8 +413,22 @@ public class Player : MonoBehaviour
     void Die()
     {
         Debug.Log("Player Died");
+        _playerDead = true; 
+        _probe.Die();
         GameManager.Instance.KillPlayer();
         OnDie?.Invoke();
+        GetComponentInChildren<MeshRenderer>().enabled = false;
+        StartCoroutine(Respawn());
+    }
+
+    public IEnumerator Respawn()
+    {
+        yield return new WaitForSeconds(.3f);
+        var yOffset = ScreenHelper.Instance.ScreenBounds.yMax - 2f;
+        var x = ScreenHelper.Instance.ScreenBounds.xMin + 2f;
+        transform.position = new Vector3(x, UnityEngine.Random.Range(-yOffset, yOffset), 0f);
+        _playerDead = false; 
+        GetComponentInChildren<MeshRenderer>().enabled = true;
     }
 
     private bool HasChangedFacing()

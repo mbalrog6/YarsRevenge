@@ -25,21 +25,25 @@ public class EntityStateMachine : MonoBehaviour
 
         _stateMachine.AddTransition(idle, chargeUp, () => Time.time > _timer);
         _stateMachine.AddTransition(chargeUp, launchTowardsPlayer, () => Time.time > _timer);
-        _stateMachine.AddTransition(launchTowardsPlayer, idle, () => Time.time > _timer);
+        _stateMachine.AddTransition(launchTowardsPlayer, idle, () => CheckForOffScreen());
         
         _stateMachine.AddAnyStateTransition(dead, () => Warlord.State == WarlordState.Dead);
         
         _stateMachine.SetState(idle);
     }
 
-    private void Update()
-    {
-        _stateMachine.Tick();
-    }
+    private void Update() => _stateMachine.Tick();
 
     public void SetTimer(float time)
     {
         _timer = Time.time + time; 
+    }
+
+    private bool CheckForOffScreen()
+    {
+        if (ScreenHelper.Instance.ScreenBounds.Contains(transform.position))
+            return false;
+        return true; 
     }
     
 }

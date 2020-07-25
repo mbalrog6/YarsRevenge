@@ -30,4 +30,14 @@ public class RectContainer
         _bounds.position = newPosition;
     }
 
+    public void SetRectContainer(float x, float y, float width, float height)
+    {
+        _bounds.x = x;
+        _bounds.y = y;
+        _bounds.width = width;
+        _bounds.height = height; 
+        _halfHeight = height / 2f;
+        _halfWidth = width / 2f;
+    }
+
 }

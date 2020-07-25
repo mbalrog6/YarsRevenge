@@ -4,6 +4,18 @@ public class OsalateMover : IMover
 {
     public float Speed { get; set; }
     public bool OscalatingInY { get; set; }
+    public float HighLimit
+    {
+        get => oscalationBounds[1];
+        set => oscalationBounds[1] = value;
+    }
+
+    public float LowLimit
+    {
+        get => oscalationBounds[0];
+        set => oscalationBounds[0] = value;
+    }
+
     public bool MovingTowardHighBound { get; private set; }
     
     private GameObject _entity;
@@ -19,8 +31,10 @@ public class OsalateMover : IMover
         _entityTransform = entity.transform;
         oscalationBounds = new float[2];
         Speed = speed;
-        OscalatingInY = true; 
-        SetOscalationBounds(lowBound, highBound);
+        OscalatingInY = true;
+        HighLimit = highBound;
+        LowLimit = lowBound;
+        //SetOscalationBounds(lowBound, highBound);
     }
 
     private void SetOscalationBounds(float lowBound, float highBound)

@@ -1,25 +1,31 @@
 ﻿using System;
 using UnityEngine;
 
+[RequireComponent(typeof(FaceTowardsRotator))]
 public class Probe : MonoBehaviour
 {
     [SerializeField] private float radius;
     [SerializeField] private Warlord warlord;
     [SerializeField] private float respawnTimer;
-    [SerializeField] private int _ScoreValue; 
+    [SerializeField] private int _ScoreValue;
+
+    [Header("Audio")] [SerializeField] private SimpleAudioEvent explosion;
+    [SerializeField] private AudioSource _audioSource;
 
     public event Action OnDie;
     public event Action OnRespawn;
-    
+
     public RectContainer ProbeRectContainer => _probeRectContainer;
-    public bool IsDead => _isDead; 
+    public bool IsDead => _isDead;
     public float Radius => radius;
     public int Score => _ScoreValue;
 
     private bool _isDead;
     private RectContainer _probeRectContainer;
     private float _timer = 0f;
-    private GameObject _visual; 
+    private GameObject _visual;
+    private FaceTowardsRotator _rotator;
+    private Transform _initialRotatorTarget;
 
 
     private void Awake()
@@ -27,6 +33,8 @@ public class Probe : MonoBehaviour
         _isDead = false;
         _visual = transform.GetChild(0).gameObject;
         _probeRectContainer = new RectContainer(this.gameObject, .125f, .125f, .5f, .5f);
+        _rotator = GetComponent<FaceTowardsRotator>();
+        _initialRotatorTarget = _rotator.Target;
     }
 
     private void Update()
@@ -42,6 +50,7 @@ public class Probe : MonoBehaviour
                 return;
             }
         }
+
         _probeRectContainer.UpdateToTargetPosition();
     }
 
@@ -49,6 +58,7 @@ public class Probe : MonoBehaviour
     {
         _isDead = true;
         _visual.SetActive(false);
+        explosion.PlayOneShot(_audioSource);
         _timer = Time.time + respawnTimer;
         OnDie?.Invoke();
     }
@@ -57,6 +67,7 @@ public class Probe : MonoBehaviour
     {
         _isDead = false;
         _visual.SetActive(true);
+        _rotator.SetTarget(_initialRotatorTarget);
         transform.position = warlord.transform.position;
         OnRespawn?.Invoke();
     }

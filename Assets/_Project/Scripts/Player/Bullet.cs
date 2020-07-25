@@ -9,6 +9,10 @@ public class Bullet : MonoBehaviour
     [SerializeField] private float radius = .2f;
     [SerializeField] private Barrier barrier;
 
+    [Header("Audio")] [SerializeField] private AudioSource audioSource;
+    [SerializeField] private SimpleAudioEvent _splatterSound;
+
+    private AudioSource _audioSource;
     private Vector3 _fireDirection;
     
     public bool HasBeenFired { get; private set; }
@@ -56,6 +60,7 @@ public class Bullet : MonoBehaviour
             var index = barrier.GetCellFromVector3(transform.position);
             if (index.HasValue)
             {
+                _splatterSound.PlayOneShot(audioSource);
                 barrier.DisableCellsInPlusPattern(index.Value);
                 DisableBullet();
             }

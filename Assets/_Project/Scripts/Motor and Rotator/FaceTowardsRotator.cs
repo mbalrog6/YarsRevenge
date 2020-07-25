@@ -1,10 +1,11 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class FaceTowardsRotator : MonoBehaviour, IRotator
 {
     [SerializeField] private float _rotationSpeed;
     [SerializeField] private Transform _target;
+
+    public Transform Target => _target;
     private Transform _source;
 
     private void Awake()
@@ -23,5 +24,10 @@ public class FaceTowardsRotator : MonoBehaviour, IRotator
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
         Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.forward);
         transform.rotation = Quaternion.Slerp(transform.rotation, rotation, _rotationSpeed * Time.deltaTime);
+    }
+
+    public void SetTarget(Transform newTarget)
+    {
+        _target = newTarget; 
     }
 }

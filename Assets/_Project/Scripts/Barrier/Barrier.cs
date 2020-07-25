@@ -7,6 +7,18 @@ public class Barrier : MonoBehaviour, IBarrier
     [SerializeField] private int height;
     [SerializeField] private float rotationPulseTime = .5f;
 
+    public float UpperLimit
+    {
+        get => _mover.HighLimit;
+        set => _mover.HighLimit = value;
+    }
+
+    public float BottomLimit
+    {
+        get => _mover.LowLimit;
+        set => _mover.LowLimit = value;
+    }
+
     public int Score(int index) => _cells[index].Score;
     public bool IsReflective => true; 
     public float WidthOfCell { get; private set; }
@@ -32,7 +44,7 @@ public class Barrier : MonoBehaviour, IBarrier
         CalculateBarriorBounds();
         CalculateWarlordSpawnOffset();
         _timer = Time.time + rotationPulseTime;
-        _mover = new OsalateMover(this.gameObject,5f,  -5f, 3f );
+        _mover = new OsalateMover(this.gameObject,0,  0, 3f );
         _shifter = new BarrierCellShifter(this, ref _cells, width, height);
         _shifter.Pattern = BarrierShiftPatterns.SnakeUp;
     }

@@ -9,6 +9,12 @@ public class CannonShot : MonoBehaviour
     [SerializeField] private Warlord warlord;
     [SerializeField] private Transform[] contactPoints;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private SimpleAudioEvent explosion;
+    [SerializeField] private SimpleAudioEvent cannonFire;
+    [SerializeField] private SimpleAudioEvent rebound;
+
     private RectContainer _collisionRect;
     private DirectionalMover _mover;
     private MirrorTargetYMover _yMover;
@@ -34,17 +40,15 @@ public class CannonShot : MonoBehaviour
     {
         _collisionRect.UpdateToTargetPosition();
 
-        if (transform.position.x > ScreenHelper.Instance.ScreenBounds.xMax)
-        {
-            Die();
-        }
-
         CheckForCollisions();
         CheckOffScreen();
     }
 
     private void CheckOffScreen()
     {
+        if (!HasFired)
+            return; 
+        
         if (!ScreenHelper.Instance.ScreenBounds.Contains(transform.position))
         {
             Die();
@@ -68,10 +72,11 @@ public class CannonShot : MonoBehaviour
                 {
                     Direction = CardinalDirection.WEST;
                     _mover.Direction = Direction;
+                    rebound.PlayOneShot(audioSource);
                 }
                 else
                 {
-                    Die();
+                    Explode();
                 }
             }
         }
@@ -80,7 +85,7 @@ public class CannonShot : MonoBehaviour
         {
             if (_collisionRect.Bounds.Overlaps(probe.ProbeRectContainer.Bounds))
             {
-                Die();
+                Explode();
                 probe.Die();
                 GameManager.Instance.AddScore(probe.Score);
             }
@@ -92,7 +97,7 @@ public class CannonShot : MonoBehaviour
         if (_collisionRect.Bounds.Overlaps(warlord.WarlordRectContainer.Bounds))
         {
             GameManager.Instance.AddScore(warlord.Score);
-            Die();
+            Explode();
             warlord.Die();
         }
     }
@@ -131,6 +136,7 @@ public class CannonShot : MonoBehaviour
 
     public void Die()
     {
+        
         _mover.enabled = false;
         _yMover.enabled = true;
         HasFired = false;
@@ -138,6 +144,19 @@ public class CannonShot : MonoBehaviour
         _mover.Direction = CardinalDirection.EAST;
         OnDie?.Invoke(); 
         gameObject.SetActive(false);
+    }
+
+    public void Fire()
+    {
+        EnableMover();
+        cannonFire.PlayOneShot(audioSource);
+        HasFired = true; 
+    }
+
+    public void Explode()
+    {
+        explosion.PlayOneShot(audioSource);
+        Die();
     }
 
     private void OnDrawGizmos()
