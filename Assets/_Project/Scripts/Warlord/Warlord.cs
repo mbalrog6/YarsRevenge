@@ -13,6 +13,11 @@ public class Warlord : MonoBehaviour
     [SerializeField] private float ammoCooldown;
     [SerializeField] private int _scoreForSwirl;
     [SerializeField] private int _scoreForWarlord;
+
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private SimpleAudioEvent swirlAttack;
+    [SerializeField] private SimpleAudioEvent chargeUpSound;
     public static WarlordState State { get; set; } = WarlordState.Idle;
     public bool CanGetAmmo => Time.time > _ammoProvidedTimer;
     public RectContainer WarlordRectContainer => _warlordBounds;
@@ -24,6 +29,7 @@ public class Warlord : MonoBehaviour
     private void Awake()
     {
         _warlordBounds = new RectContainer( this.gameObject, 1f, 1f, 1f, 1f);
+        audioSource = GetComponent<AudioSource>();
     }
 
     private void Update()
@@ -40,6 +46,26 @@ public class Warlord : MonoBehaviour
     public void Die()
     {
         State = WarlordState.Dead;
+    }
+
+    public void StopSound()
+    {
+        audioSource.Stop();
+    }
+
+    public void PlayLaunchAtSound()
+    {
+        if (audioSource.isPlaying)
+            return;
+        
+        swirlAttack.Play(audioSource);
+    }
+
+    public void PlayChargingSound()
+    {
+        if (audioSource.isPlaying)
+            return;
+        chargeUpSound.Play(audioSource);
     }
 
     private void OnDrawGizmos()

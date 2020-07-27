@@ -34,6 +34,7 @@ public class ChargeUp : IState
 
         _material.color = _colorChoice ? _color1 : _color2;
         _transform.position = _targetTransform.position;
+        _entity.WarlordEntity.PlayChargingSound();
 
     }
 
@@ -41,10 +42,11 @@ public class ChargeUp : IState
     {
         _entity.SetTimer(2f);
         Warlord.State = WarlordState.ChargeUp;
+        _entity.WarlordEntity.PlayChargingSound();
     }
 
     public void OnExit()
     {
-        
+        _entity.WarlordEntity.StopSound();
     }
 }

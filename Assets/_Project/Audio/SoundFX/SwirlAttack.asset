@@ -12,14 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf58a782240f65046a446ae593a3d7b6, type: 3}
   m_Name: SwirlAttack
   m_EditorClassIdentifier: 
-  clips: []
+  clips:
+  - {fileID: 8300000, guid: 580613f388668a145bb2ee370c6b94f3, type: 3}
   volume:
-    minValue: 1
-    maxValue: 1
+    minValue: 0.46633574
+    maxValue: 0.51597893
   pitch:
-    minValue: 1
-    maxValue: 1
+    minValue: 0.8883028
+    maxValue: 1.124108
   distance:
     minValue: 1
     maxValue: 1000
-  mixer: {fileID: 0}
+  mixer: {fileID: -3230561352502829109, guid: 03afc2660ac1a1e47a42dd4677c0ec1c, type: 2}

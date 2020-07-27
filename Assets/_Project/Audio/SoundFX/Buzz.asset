@@ -12,14 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf58a782240f65046a446ae593a3d7b6, type: 3}
   m_Name: Buzz
   m_EditorClassIdentifier: 
-  clips: []
+  clips:
+  - {fileID: 8300000, guid: 36b953a550463f44b9284ef26cc80a37, type: 3}
+  - {fileID: 8300000, guid: cdef8ba85e4b20a42b08b4faaa034a4e, type: 3}
   volume:
-    minValue: 1
-    maxValue: 1
+    minValue: 0.06666663
+    maxValue: 0.13333331
   pitch:
-    minValue: 1
-    maxValue: 1
+    minValue: 1.1666666
+    maxValue: 1.3333333
   distance:
     minValue: 1
     maxValue: 1000
-  mixer: {fileID: 0}
+  mixer: {fileID: -3230561352502829109, guid: 03afc2660ac1a1e47a42dd4677c0ec1c, type: 2}

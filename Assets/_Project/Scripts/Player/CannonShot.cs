@@ -57,7 +57,7 @@ public class CannonShot : MonoBehaviour
 
     private void CheckForCollisions()
     {
-        if (_collisionRect.Bounds.Overlaps(barrier.BarrierRectContainer.Bounds))
+        if (_collisionRect.Bounds.Overlaps(barrier.BarrierRectContainer.Bounds) && Direction == CardinalDirection.EAST)
         {
             CheckCannonShotContactPointsForBarriorCollision(contactPoints, Vector3.zero);
             if (_cellIndexs.Count > 0)

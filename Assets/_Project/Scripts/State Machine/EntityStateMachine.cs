@@ -1,11 +1,19 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 public class EntityStateMachine : MonoBehaviour
 {
     [SerializeField] private Player player;
     [SerializeField] private Barrier barrier;
+    public Warlord WarlordEntity => _warlord;
 
     private float _timer;
     private StateMachine _stateMachine;
+    private Warlord _warlord;
+
+    private void Awake()
+    {
+        _warlord = GetComponent<Warlord>();
+    }
 
     private void Start()
     {

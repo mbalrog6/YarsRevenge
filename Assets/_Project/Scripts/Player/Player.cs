@@ -68,7 +68,7 @@ public class Player : MonoBehaviour
     {
         _eatTimer = 0f;
         _startPosition = transform.position;
-        PlayerInput = new PlayerInput();
+        
         _mover = new KineticMover(this);
         _rotator = new DirectionalRotator(this);
         
@@ -84,7 +84,7 @@ public class Player : MonoBehaviour
     }
 
     private void Start()
-    {
+    { ;
         _playerCollisions = new PlayerCollisions(_playerRectContainer);
         _playerCollisions.AddEntityRect(EntityCast.Cannon, _cannonShot.CannonRectContainer);
         _playerCollisions.AddEntityRect(EntityCast.Barrier, _barrier.BarrierRectContainer);
@@ -124,8 +124,9 @@ public class Player : MonoBehaviour
 
         _startPosition = transform.position;
 
-        PlayerInput.Tick();
-        PlayerInput.CopyDTO(ref _playerInputDTO);
+        //PlayerInput.Tick();
+        //PlayerInput.CopyDTO(ref _playerInputDTO);
+        _playerInputDTO = InputManager.Instance.PlayerInputDTO;
         _rotator.Tick();
 
         if (PlayerInputDTO.Direction != CardinalDirection.NONE)
@@ -303,7 +304,7 @@ public class Player : MonoBehaviour
 
     private void FireCannon()
     {
-        if (PlayerInput.Inputs.FireButton && !_cannonShot.HasFired)
+        if (_playerInputDTO.FireButton && !_cannonShot.HasFired)
         {
             _cannonShot.Fire();
         }
@@ -363,7 +364,7 @@ public class Player : MonoBehaviour
         if (_fireBulletCooldownTimer > Time.time || ammo <= 0)
             return;
 
-        if (!_bullet.isActiveAndEnabled && PlayerInput.Inputs.FireButton == true && _canFireBullet)
+        if (!_bullet.isActiveAndEnabled && _playerInputDTO.FireButton == true && _canFireBullet)
         {
             _bullet.FireBullet();
             _canFireBullet = false;
