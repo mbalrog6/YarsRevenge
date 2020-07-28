@@ -15,6 +15,11 @@ public class MoveForward2D : MonoBehaviour
 
     private void Update()
     {
+        if (GameStateMachine.Instance.CurrentState == States.PAUSE)
+        {
+            return;
+        }
+        
         float angle = (transform.eulerAngles.z) * Mathf.Deg2Rad;
         float sin = Mathf.Sin(angle);
         float cos = Mathf.Cos(angle);

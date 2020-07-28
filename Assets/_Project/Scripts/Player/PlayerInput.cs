@@ -8,12 +8,14 @@ public struct InputDTO
     public CardinalDirection Direction; 
     public CardinalDirection LastDirection;
     public CardinalDirection LastFacingDirection;
+    public bool Paused;
 
     public InputDTO( float horizontal, float vertical, 
         bool fireButton,
         CardinalDirection direction, 
         CardinalDirection lastDirection, 
-        CardinalDirection lastFacingDirection )
+        CardinalDirection lastFacingDirection,
+        bool paused)
     {
         this.Vertical = vertical;
         this.Horizontal = horizontal;
@@ -21,8 +23,9 @@ public struct InputDTO
         this.Direction = direction;
         this.LastDirection = lastDirection;
         this.LastFacingDirection = lastFacingDirection;
+        this.Paused = paused;
     }
-    
+
     public override string ToString()
     {
         var inputsSting = $"Vertical = {Vertical}\r\nHorizontal = {Horizontal}\r\nFirebutton = {FireButton.ToString()}\r\n" +
@@ -41,7 +44,8 @@ public class PlayerInput : IPlayerInput
             false,
             CardinalDirection.NONE,
             CardinalDirection.NONE,
-            CardinalDirection.NORTH);
+            CardinalDirection.NORTH,
+            false);
     }
     public void Tick()
     {
@@ -61,6 +65,15 @@ public class PlayerInput : IPlayerInput
             input.LastFacingDirection = input.LastDirection;
         }
         input.Direction = CardinalDirections.GetDirectionFromInput(input.Vertical, input.Horizontal);
+
+        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetButtonDown("Pause"))
+        {
+            input.Paused = true;
+        }
+        else
+        {
+            input.Paused = false;
+        }
 
         _inputDTO = input;
     }

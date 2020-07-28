@@ -4,7 +4,7 @@ public class MenuInputInterpreter
 {
     private int _lastVertical;
     private int _vertical;
-    private MenuInputDTO menuInput; 
+    private MenuInputDTO menuInput;
 
     public MenuInputDTO Transform(InputDTO playerInputDTO)
     {
@@ -31,6 +31,7 @@ public class MenuInputInterpreter
         menuInput.MousePosition = Input.mousePosition;
 
         menuInput.Button = playerInputDTO.FireButton;
+        menuInput.Paused = playerInputDTO.Paused;
 
         return menuInput; 
     }
@@ -40,5 +41,6 @@ public struct MenuInputDTO
 {
     public int Vertical;
     public bool Button;
-    public Vector2 MousePosition; 
+    public Vector2 MousePosition;
+    public bool Paused;
 }

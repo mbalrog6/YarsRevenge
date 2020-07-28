@@ -1,9 +1,14 @@
 ﻿using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
+using Vector3 = UnityEngine.Vector3;
 
 public class MenuManager : MonoBehaviour
-{
+{ 
+    [SerializeField] private bool StartOnScreen = true;
+    [SerializeField] private bool _hasFocus = true;
     public int CurrentButtonIndex => _buttonIndex;
+    public MenuInputDTO MenuInputDTO => _menuInputDTO;
 
     public bool HasFocus
     {
@@ -11,15 +16,31 @@ public class MenuManager : MonoBehaviour
         set { _hasFocus = value;  }
     }
 
-    [SerializeField] private bool _hasFocus = true;
-
     private List<IMenuButton> _buttons;
     private int _buttonIndex;
-    
+
+    private MenuInputInterpreter _menuInputInterpreter;
     private MenuInputDTO _menuInputDTO;
+    private RectTransform _rectTransform;
+    private Vector3 _startPosition;
+    private Vector3 _originPosition;
+    private bool _initialized = false;
 
     private void Awake()
     {
+        _rectTransform = GetComponent<RectTransform>();
+        if (StartOnScreen)
+        {
+            _startPosition = _rectTransform.localPosition;
+        }
+        else
+        {
+            _originPosition = _rectTransform.position;
+            _rectTransform.localPosition = new Vector3(_rectTransform.localPosition.x, Screen.height, 0);
+            _startPosition = _rectTransform.position;
+        }
+
+        _menuInputInterpreter = new MenuInputInterpreter();
         _buttons = new List<IMenuButton>();
         _buttonIndex = 0;
 
@@ -31,14 +52,16 @@ public class MenuManager : MonoBehaviour
             button.SetIndex(index);
             index++;
         }
+        
         _buttons[0].OnEnter();
+        _initialized = true; 
     }
 
     private void Update()
     {
-        if (!HasFocus) return; 
-        
-        _menuInputDTO = InputManager.Instance.GetMenuInputDTO();
+        if (!HasFocus) return;
+
+        _menuInputDTO = _menuInputInterpreter.Transform(InputManager.Instance.PlayerInputDTO);
 
         if (_menuInputDTO.Vertical == 1)
         {
@@ -60,6 +83,23 @@ public class MenuManager : MonoBehaviour
         {
             _buttons[_buttonIndex].OnClick();
         }
+    }
+
+    public void SetPosition(Vector3 position) => _rectTransform.localPosition = position;
+
+    public void TweenToOrigin()
+    {
+        _rectTransform.DOMove(_originPosition, .5f).SetEase(Ease.InFlash);
+    }
+
+    public void TweenToPosition(Vector3 position, float duration)
+    {
+        _rectTransform.DOMove(position, duration);
+    }
+
+    public void TweenToStart()
+    {
+        _rectTransform.DOMove(_startPosition, .2f);
     }
 
     private int GetMouseOverButtonIndex()

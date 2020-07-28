@@ -35,6 +35,7 @@ public class GameManager : MonoBehaviour
     {
         DebugText.Instance.SetText($"Lives = [{Lives}] Score = {Score}");
 
+        /*
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Time.timeScale = (Time.timeScale == 0) ? 1f : 0f;
@@ -47,6 +48,7 @@ public class GameManager : MonoBehaviour
                 IsPaused = true; 
             }
         }
+        */
     }
 
     private void InitializeStartValues()

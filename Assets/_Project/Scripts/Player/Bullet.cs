@@ -36,6 +36,11 @@ public class Bullet : MonoBehaviour
 
     private void Update()
     {
+        if (GameStateMachine.Instance.CurrentState == States.PAUSE)
+        {
+            return;
+        }
+
         if (HasBeenFired)
         {
             Move();

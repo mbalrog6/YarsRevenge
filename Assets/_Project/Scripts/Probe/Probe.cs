@@ -22,10 +22,11 @@ public class Probe : MonoBehaviour
 
     private bool _isDead;
     private RectContainer _probeRectContainer;
-    private float _timer = 0f;
     private GameObject _visual;
     private FaceTowardsRotator _rotator;
     private Transform _initialRotatorTarget;
+    private float _timer = 0f;
+    private float _pauseDelay;
 
 
     private void Awake()
@@ -39,6 +40,19 @@ public class Probe : MonoBehaviour
 
     private void Update()
     {
+        if (GameStateMachine.Instance.CurrentState == States.PAUSE)
+        {
+            _pauseDelay += Time.deltaTime;
+            return;
+        }
+
+        if (_pauseDelay > 0)
+        {
+            _timer += _pauseDelay;
+            _pauseDelay = 0f;
+        }
+        
+        
         if (IsDead)
         {
             if (Time.time > _timer && Warlord.State == WarlordState.Idle)

@@ -25,7 +25,8 @@ namespace a_player
                 new InputDTO(0f, 1f, false,
                     CardinalDirection.EAST,
                     CardinalDirection.EAST,
-                CardinalDirection.EAST));
+                CardinalDirection.EAST,
+                    false));
             yield return new WaitForSeconds(2f);
             
             Assert.Less(playerPositionX, player.transform.position.x);
@@ -47,7 +48,8 @@ namespace a_player
                 new InputDTO(0f, -1f, false, 
                     CardinalDirection.WEST,
                     CardinalDirection.WEST,
-                    CardinalDirection.WEST));
+                    CardinalDirection.WEST,
+                    false));
             yield return new WaitForSeconds(2f);
             
             Assert.Greater(playerPositionX, player.transform.position.x);
@@ -69,7 +71,8 @@ namespace a_player
                 new InputDTO(1f, 0f, false, 
                     CardinalDirection.NORTH,
                     CardinalDirection.NORTH,
-                    CardinalDirection.NORTH));
+                    CardinalDirection.NORTH,
+                    false));
             yield return new WaitForSeconds(2f);
             
             Assert.Less(playerPositionY, player.transform.position.y);
@@ -91,7 +94,8 @@ namespace a_player
                 new InputDTO(-1f, 0f, false,
                     CardinalDirection.SOUTH,
                     CardinalDirection.SOUTH,
-                    CardinalDirection.SOUTH));
+                    CardinalDirection.SOUTH,
+                    false));
             yield return new WaitForSeconds(2f);
             
             Assert.Greater(playerPositionY, player.transform.position.y);

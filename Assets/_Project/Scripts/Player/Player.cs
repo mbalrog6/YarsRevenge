@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using TMPro;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -56,7 +55,6 @@ public class Player : MonoBehaviour
     private bool _cannonDeployed;
     private int ammo = 0;
     
-    private float delayTimer = 0f;
     private float _warlordAmmoTimer;
     private bool _playerDead = false;
     private AudioSource _audioSource;
@@ -112,20 +110,13 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        if (GameManager.Instance.IsPaused)
-            return; 
-        
-        if (Time.time < delayTimer)
+        if (GameStateMachine.Instance.CurrentState == States.PAUSE)
         {
             return;
         }
 
-        delayTimer = Time.time + 0.0f;
-
         _startPosition = transform.position;
-
-        //PlayerInput.Tick();
-        //PlayerInput.CopyDTO(ref _playerInputDTO);
+        
         _playerInputDTO = InputManager.Instance.PlayerInputDTO;
         _rotator.Tick();
 

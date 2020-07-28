@@ -8,7 +8,6 @@ public class InputManager : MonoBehaviour
     public InputDTO PlayerInputDTO => _playerInputDTO;
 
     private PlayerInput _playerInput;
-    private MenuInputInterpreter _menuInputInterpreter;
     private InputDTO _playerInputDTO;
 
     private void Awake()
@@ -23,7 +22,6 @@ public class InputManager : MonoBehaviour
             DontDestroyOnLoad(this);
 
             _playerInput = new PlayerInput();
-            _menuInputInterpreter = new MenuInputInterpreter();
             _playerInputDTO = new InputDTO();
         }
     }
@@ -33,6 +31,5 @@ public class InputManager : MonoBehaviour
         _playerInput.Tick();
         _playerInput.SetInput(ref _playerInputDTO);
     }
-
-    public MenuInputDTO GetMenuInputDTO() => _menuInputInterpreter.Transform(_playerInputDTO);
+    
 }

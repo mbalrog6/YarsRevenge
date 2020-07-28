@@ -7,6 +7,7 @@ public class EntityStateMachine : MonoBehaviour
     public Warlord WarlordEntity => _warlord;
 
     private float _timer;
+    private float _pauseDelay;
     private StateMachine _stateMachine;
     private Warlord _warlord;
 
@@ -40,7 +41,23 @@ public class EntityStateMachine : MonoBehaviour
         _stateMachine.SetState(idle);
     }
 
-    private void Update() => _stateMachine.Tick();
+    private void Update()
+    {
+        if (GameStateMachine.Instance.CurrentState == States.PAUSE)
+        {
+            _pauseDelay += Time.deltaTime;
+            return;
+        }
+
+        if (_pauseDelay > 0)
+        {
+            _timer += _pauseDelay;
+            _pauseDelay = 0f;
+        }
+        
+        
+            _stateMachine.Tick();
+    }
 
     public void SetTimer(float time)
     {

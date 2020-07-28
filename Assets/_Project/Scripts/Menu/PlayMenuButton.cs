@@ -1,6 +1,4 @@
-﻿using System;
-using DG.Tweening;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayMenuButton : ShakeButton
@@ -9,6 +7,7 @@ public class PlayMenuButton : ShakeButton
     [SerializeField] private SimpleAudioEvent _onEnterButtonSound;
     [SerializeField] private Image _image;
     private Color _color;
+    private bool _initalized = false;
 
     public override void OnEnter()
     {
@@ -16,7 +15,11 @@ public class PlayMenuButton : ShakeButton
         _color = _image.color;
         _image.color = Color.yellow;
 
-       
+        if (_initalized == false)
+        {
+            _initalized = true;
+            return;
+        }
         if (_audioSource != null && _onEnterButtonSound != null)
         {
             _onEnterButtonSound.PlayOneShot(_audioSource);
@@ -30,6 +33,6 @@ public class PlayMenuButton : ShakeButton
 
     public override void OnClick()
     {
-        
+        GameStateMachine.Instance.ChangeTo = States.LOADING;
     }
 }

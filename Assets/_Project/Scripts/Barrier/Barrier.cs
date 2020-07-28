@@ -31,12 +31,13 @@ public class Barrier : MonoBehaviour, IBarrier
     public RectContainer BarrierRectContainer => _barrierRectContainer;
     private Vector3 _rectOffset;
 
-    private float _timer; 
     private Transform _warlordSpawnPoint;
     private OsalateMover _mover;
     private BarrierCellShifter _shifter;
+    private float _timer;
+    private float _pauseDelay;
 
-    private void Awake()
+    private void Awake()    
     {
         var numberOfCells = CalculateDimensionsBasedOnCellPrefab();
         _cells = new BarrierCell[numberOfCells];
@@ -51,6 +52,18 @@ public class Barrier : MonoBehaviour, IBarrier
 
     private void Update()
     {
+        if (GameStateMachine.Instance.CurrentState == States.PAUSE)
+        {
+            _pauseDelay += Time.deltaTime;
+            return;
+        }
+
+        if (_pauseDelay > 0)
+        {
+            _timer += _pauseDelay;
+            _pauseDelay = 0f;
+        }
+        
         _mover.Tick();
         var position = transform.position + _rectOffset;
         _barrierRectContainer.UpdatePosition(position);
