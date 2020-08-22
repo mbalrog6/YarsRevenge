@@ -1,15 +1,19 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class ResumeButton : ShakeButton
 {
-    [SerializeField] private AudioSource _audioSource;
     [SerializeField] private SimpleAudioEvent _onEnterButtonSound;
+    [SerializeField] private SimpleAudioEvent _onClickButtonSound;
     [SerializeField] private Image _image;
+    private AudioSource _audioSource;
     private Color _color;
     private bool _initialized = false;
+
+    private void Start()
+    {
+        _audioSource = AudioManager.Instance.RequestOmniPresentAudioSource();
+    }
 
     public override void OnEnter()
     {
@@ -35,6 +39,7 @@ public class ResumeButton : ShakeButton
 
     public override void OnClick()
     {
+        _onClickButtonSound.PlayOneShot(_audioSource);
         GameStateMachine.Instance.ChangeTo = States.PLAY;
     }
 }

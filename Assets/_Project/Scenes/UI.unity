@@ -535,16 +535,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Pause Menu
       objectReference: {fileID: 0}
-    - target: {fileID: 7715836091825256814, guid: 0b4afb5367f84c648a1817ae78590d94,
-        type: 3}
-      propertyPath: StartOnScreen
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7715836091825256814, guid: 0b4afb5367f84c648a1817ae78590d94,
-        type: 3}
-      propertyPath: _hasFocus
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 7715836092486212471, guid: 0b4afb5367f84c648a1817ae78590d94,
         type: 3}
       propertyPath: m_Material

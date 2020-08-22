@@ -4,6 +4,7 @@ public class MenuInputInterpreter
 {
     private int _lastVertical;
     private int _vertical;
+    private int _horizontal;
     private MenuInputDTO menuInput;
 
     public MenuInputDTO Transform(InputDTO playerInputDTO)
@@ -11,6 +12,13 @@ public class MenuInputInterpreter
         _lastVertical = _vertical;
         _vertical = playerInputDTO.Vertical > 0.1 ? 1 : 0;
         _vertical = playerInputDTO.Vertical < -0.1 ? -1 : _vertical;
+        _horizontal = playerInputDTO.Horizontal > 0.1 ? -1 : 0;
+        _horizontal = playerInputDTO.Horizontal < -0.1 ? 1 : _horizontal;
+
+        if (_vertical == 0 && _horizontal != 0)
+        {
+            _vertical = _horizontal;
+        }
 
         if (_lastVertical == _vertical)
         {

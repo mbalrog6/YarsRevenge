@@ -11,13 +11,16 @@ public class ChargeUp : IState
     private bool _colorChoice;
     private Material _material;
     private Transform _transform;
-    private Transform _targetTransform; 
+    private Barrier2 _barrier;
+    private float chargeTime;
+    private float chargeTimeMin;
+    private float chargeTimeMax;
     
-    public ChargeUp(EntityStateMachine entity, Transform target)
+    public ChargeUp(EntityStateMachine entity)
     {
+        GameManager.Instance.OnBarrierChanged += UpdateBarrier;
         _entity = entity;
         _transform = entity.transform;
-        _targetTransform = target;
         _color1 = Color.magenta;
         _color2 = Color.white;
         _timer = Time.time + _timer;
@@ -33,14 +36,14 @@ public class ChargeUp : IState
         }
 
         _material.color = _colorChoice ? _color1 : _color2;
-        _transform.position = _targetTransform.position;
+        _transform.position = _barrier.WarlordSpawnPoint;
         _entity.WarlordEntity.PlayChargingSound();
 
     }
 
     public void OnEnter()
     {
-        _entity.SetTimer(2f);
+        _entity.SetTimer(_entity.ChargeTime);
         Warlord.State = WarlordState.ChargeUp;
         _entity.WarlordEntity.PlayChargingSound();
     }
@@ -48,5 +51,11 @@ public class ChargeUp : IState
     public void OnExit()
     {
         _entity.WarlordEntity.StopSound();
+        _entity.ChargeTimeAdvancementCount++;
+    }
+    
+    public void UpdateBarrier(Barrier2 barrier)
+    {
+        _barrier = barrier;
     }
 }

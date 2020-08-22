@@ -20,7 +20,7 @@ public class Barrier : MonoBehaviour, IBarrier
     }
 
     public int Score(int index) => _cells[index].Score;
-    public bool IsReflective => true; 
+    public bool IsReflective { get; set; } = true;
     public float WidthOfCell { get; private set; }
     public float HeightOfCell { get; private set; }
     public bool IsCellActive(int index) => _cells[index].isActiveAndEnabled;
@@ -37,17 +37,36 @@ public class Barrier : MonoBehaviour, IBarrier
     private float _timer;
     private float _pauseDelay;
 
-    private void Awake()    
+    private BarrierInfo _barrierInfo;
+
+    private void Awake()
     {
+        _barrierInfo = GetComponent<BarrierInfo>();
         var numberOfCells = CalculateDimensionsBasedOnCellPrefab();
+        var barrierCreator = new BarrierDeffintionCreator();
+        int index = Random.Range(0, barrierCreator.Count );
+        if (index == 0) IsReflective = false;
+ 
+        width = barrierCreator[index].Width;
+        height = barrierCreator[index].Height;
+        numberOfCells = width * height; 
         _cells = new BarrierCell[numberOfCells];
         FillBarrierWithCells(numberOfCells);
         CalculateBarriorBounds();
+        barrierCreator.CreateBarrier(ref _cells, index);
         CalculateWarlordSpawnOffset();
         _timer = Time.time + rotationPulseTime;
         _mover = new OsalateMover(this.gameObject,0,  0, 3f );
-        _shifter = new BarrierCellShifter(this, ref _cells, width, height);
-        _shifter.Pattern = BarrierShiftPatterns.SnakeUp;
+        _shifter = new BarrierCellShifter(ref _cells, width, height);
+
+        if (index != 2)
+        {
+            _shifter.Pattern = BarrierShiftPatterns.None;
+        }
+        else
+        {
+            _shifter.Pattern = BarrierShiftPatterns.SnakeDown;
+        }
     }
 
     private void Update()
@@ -79,7 +98,7 @@ public class Barrier : MonoBehaviour, IBarrier
     {
         _warlordSpawnPoint = gameObject.transform.GetChild(0);
         Vector3 spawnLocalPosition = new Vector3();
-        spawnLocalPosition.x = (WidthOfCell * width) / 2f;
+        spawnLocalPosition.x = (WidthOfCell * width) / 2f + .5f;
         spawnLocalPosition.y = (HeightOfCell * height) / 2f;
         _warlordSpawnPoint.localPosition = spawnLocalPosition;
     }
@@ -195,7 +214,7 @@ public class Barrier : MonoBehaviour, IBarrier
 
     private Vector3 DetermineCellPosition(int i)
     {
-        return new Vector3((i % width) * WidthOfCell, Mathf.Floor(i / width) * WidthOfCell, 0f);
+        return new Vector3((i % width) * WidthOfCell, Mathf.Floor(i / width) * HeightOfCell, 0f);
     }
 
     public int? GetCellFromVector3(Vector3 screenPoint)

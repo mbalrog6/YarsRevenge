@@ -8,6 +8,12 @@ public class MoveForward2D : MonoBehaviour
     
     private Vector3 _direction = Vector3.up;
 
+    public float Speed
+    {
+        get => speed;
+        set => speed = value;
+    }
+
     private void Awake()
     {
         _direction = _initialFacingVector;

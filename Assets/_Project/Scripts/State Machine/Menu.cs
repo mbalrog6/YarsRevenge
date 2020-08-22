@@ -11,7 +11,14 @@ public class Menu : IState
     }
     public void Tick()
     {
-                
+        if (_menuManager.MenuInputDTO.Paused)
+        {
+            #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+            #else
+            Application.Quit();
+            #endif
+        }
     }
 
     public void OnEnter()
@@ -19,7 +26,7 @@ public class Menu : IState
         _stateMachine.CurrentState = States.MENU;
         _stateMachine.ChangeTo = States.NONE;
         _menuManager = GameObject.FindObjectOfType<MenuManager>();
-        _menuManager.HasFocus = true; 
+        _menuManager.HasFocus = true;
     }
 
     public void OnExit()

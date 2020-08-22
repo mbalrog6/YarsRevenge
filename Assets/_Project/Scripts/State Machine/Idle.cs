@@ -2,35 +2,42 @@
 
 public class Idle : IState
 {
-    private Transform _target;
+    private Barrier2 _barrier;
     private EntityStateMachine _entity;
     private Transform _transform;
-    
 
-    public Idle(EntityStateMachine entity, Transform target)
+    public Idle(EntityStateMachine entity)
     {
+        GameManager.Instance.OnBarrierChanged += UpdateBarrier;
         _entity = entity;
         _transform = _entity.transform;
-        _transform.position = target.position;
-        _target = target;
+        if (_barrier != null)
+        {
+            _transform.position = _barrier.WarlordSpawnPoint;
+        }
     }
     public void Tick()
     {
-        Debug.Log("Ticking the Idle state.");
-        _transform.position = _target.position;
-
+        _transform.position = _barrier.WarlordSpawnPoint;
     }
 
     public void OnEnter()
     {
-        Debug.Log("Entered the Idle state.");
-        _transform.position = _target.position;
+        if (_barrier != null)
+        {
+            _transform.position = _barrier.WarlordSpawnPoint;
+        }
         _entity.SetTimer(3f);
         Warlord.State = WarlordState.Idle;
     }
 
     public void OnExit()
     {
-        Debug.Log("Exited the Idle state.");
+        
+    }
+
+    public void UpdateBarrier(Barrier2 barrier)
+    {
+        _barrier = barrier;
     }
 }

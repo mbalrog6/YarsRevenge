@@ -10,8 +10,7 @@ public class BarrierCellShifter : IShifter
 {
     public bool IsCellActive(int index) => _cells[index].isActiveAndEnabled;
     public BarrierShiftPatterns Pattern { get; set; } = BarrierShiftPatterns.None;
-
-    private Barrier _barrier;
+    
     private BarrierCell[] _cells;
 
     private int width;
@@ -25,9 +24,8 @@ public class BarrierCellShifter : IShifter
     private bool lastValue;
     private bool nextValue;
     
-    public BarrierCellShifter(Barrier barrier, ref BarrierCell[] cellArray, int width, int height)
+    public BarrierCellShifter(ref BarrierCell[] cellArray, int width, int height)
     {
-        _barrier = barrier;
         _cells = cellArray;
         this.width = width;
         this.height = height;

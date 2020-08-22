@@ -6,11 +6,12 @@ public class Probe : MonoBehaviour
 {
     [SerializeField] private float radius;
     [SerializeField] private Warlord warlord;
-    [SerializeField] private float respawnTimer;
     [SerializeField] private int _ScoreValue;
+    [SerializeField] private MoveForward2D _mover;
 
-    [Header("Audio")] [SerializeField] private SimpleAudioEvent explosion;
-    [SerializeField] private AudioSource _audioSource;
+    [Header("Audio")] 
+    [SerializeField] private SimpleAudioEvent explosion;
+    private AudioSource _audioSource;
 
     public event Action OnDie;
     public event Action OnRespawn;
@@ -26,7 +27,15 @@ public class Probe : MonoBehaviour
     private FaceTowardsRotator _rotator;
     private Transform _initialRotatorTarget;
     private float _timer = 0f;
+    private float _respawnTimer;
+    private float _respawnDecrementTimer;
+    private float _speedIncrementTimer;
     private float _pauseDelay;
+    [SerializeField] private ProbeInfo _probeInfo;
+    private float _speedLerpIncrement;
+    private float _rechargeLerpIncrement;
+    private float _speedLerpProgression;
+    private float _rechargeLerpProgression;
 
 
     private void Awake()
@@ -36,11 +45,15 @@ public class Probe : MonoBehaviour
         _probeRectContainer = new RectContainer(this.gameObject, .125f, .125f, .5f, .5f);
         _rotator = GetComponent<FaceTowardsRotator>();
         _initialRotatorTarget = _rotator.Target;
+        _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
+        
+        SetProbeInfo(_probeInfo);
     }
 
     private void Update()
     {
-        if (GameStateMachine.Instance.CurrentState == States.PAUSE)
+        if (GameStateMachine.Instance.CurrentState == States.PAUSE || 
+        GameStateMachine.Instance.CurrentState == States.BRIEF_PAUSE)
         {
             _pauseDelay += Time.deltaTime;
             return;
@@ -49,10 +62,27 @@ public class Probe : MonoBehaviour
         if (_pauseDelay > 0)
         {
             _timer += _pauseDelay;
+            _respawnDecrementTimer += _pauseDelay;
+            _speedIncrementTimer += _pauseDelay;
             _pauseDelay = 0f;
         }
-        
-        
+
+        if (Time.time > _respawnDecrementTimer)
+        {
+            _respawnDecrementTimer = Time.time + _probeInfo.probeRespawnChangeTimer;
+            _rechargeLerpProgression += _rechargeLerpIncrement;
+            _rechargeLerpProgression = Mathf.Clamp(_rechargeLerpProgression, 0f, 1f);
+            SetRespawnTimer();
+        }
+
+        if (Time.time > _speedIncrementTimer)
+        {
+            _speedIncrementTimer = Time.time + _probeInfo.speedIncrementTimer;
+            _speedLerpProgression += _speedLerpIncrement;
+            _speedLerpProgression = Mathf.Clamp(_speedLerpProgression, 0f, 1f);
+            SetProbeSpeed();
+        }
+
         if (IsDead)
         {
             if (Time.time > _timer && Warlord.State == WarlordState.Idle)
@@ -68,12 +98,22 @@ public class Probe : MonoBehaviour
         _probeRectContainer.UpdateToTargetPosition();
     }
 
+    private void SetProbeSpeed()
+    {
+         _mover.Speed = Mathf.Lerp(_probeInfo.probeSpeedMin, _probeInfo.probeSpeedMax, _speedLerpProgression);
+    }
+
+    private void SetRespawnTimer()
+    {
+        _respawnTimer = Mathf.Lerp(_probeInfo.probeRespawnTimerMax, _probeInfo.probeRespawnTimerMin, _rechargeLerpProgression);
+    }
+
     public void Die()
     {
         _isDead = true;
         _visual.SetActive(false);
         explosion.PlayOneShot(_audioSource);
-        _timer = Time.time + respawnTimer;
+        _timer = Time.time + _respawnTimer;
         OnDie?.Invoke();
     }
 
@@ -84,6 +124,23 @@ public class Probe : MonoBehaviour
         _rotator.SetTarget(_initialRotatorTarget);
         transform.position = warlord.transform.position;
         OnRespawn?.Invoke();
+    }
+
+    public void SetProbeInfo(ProbeInfo probeInfo)
+    {
+        _probeInfo = probeInfo;
+        _speedLerpIncrement = 1f / _probeInfo.speedIncrementRate;
+        _rechargeLerpIncrement = 1f / _probeInfo.probeRespawnRateChange;
+        SetRespawnTimer();
+        SetProbeSpeed();
+    }
+
+    public void Reset( ProbeInfo probeInfo )
+    {
+        SetProbeInfo(_probeInfo);
+        _isDead = true;
+        _visual.SetActive(false);
+        _timer = Time.time + _respawnTimer;
     }
 
     private void OnDrawGizmos()

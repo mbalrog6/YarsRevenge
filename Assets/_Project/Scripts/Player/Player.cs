@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] private Barrier _barrier;
+    [SerializeField] private Barrier2 _barrier;
     [SerializeField] private Bullet _bullet;
     [SerializeField] private CannonShot _cannonShot;
     [SerializeField] private Warlord _warlord;
@@ -53,7 +53,7 @@ public class Player : MonoBehaviour
     private bool _canFireBullet;
     private float _fireBulletCooldownTimer;
     private bool _cannonDeployed;
-    private int ammo = 0;
+    private int _ammo;
     
     private float _warlordAmmoTimer;
     private bool _playerDead = false;
@@ -76,13 +76,17 @@ public class Player : MonoBehaviour
         _bullet.OnDisabled += Handle_BulletDisabled;
         _cannonShot.OnDie += Handle_CannonShotOnDie;
 
-        _audioSource = GetComponents<AudioSource>()[0];
-        _buzzSound = GetComponents<AudioSource>()[1];
-        _ionCloud = gameObject.AddComponent<AudioSource>();
+        _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
+        _buzzSound = AudioManager.Instance.RequestAudioSource(1);
+        _ionCloud = AudioManager.Instance.RequestAudioSource(2);
+
+        _ammo = 0;
+        GameManager.Instance.OnBarrierChanged += UpdateBarrier;
     }
 
     private void Start()
-    { ;
+    {
+        _playerRectContainer = new RectContainer(this.gameObject, 10, 10, 1f, 1f);
         _playerCollisions = new PlayerCollisions(_playerRectContainer);
         _playerCollisions.AddEntityRect(EntityCast.Cannon, _cannonShot.CannonRectContainer);
         _playerCollisions.AddEntityRect(EntityCast.Barrier, _barrier.BarrierRectContainer);
@@ -102,15 +106,10 @@ public class Player : MonoBehaviour
     {
         _canFireBullet = true;
     }
-
-    private void OnValidate()
-    {
-        _playerRectContainer = new RectContainer(this.gameObject, 10, 10, 1f, 1f);
-    }
-
     private void Update()
     {
-        if (GameStateMachine.Instance.CurrentState == States.PAUSE)
+        if (GameStateMachine.Instance.CurrentState == States.PAUSE  || 
+            GameStateMachine.Instance.CurrentState == States.BRIEF_PAUSE) 
         {
             return;
         }
@@ -118,6 +117,7 @@ public class Player : MonoBehaviour
         _startPosition = transform.position;
         
         _playerInputDTO = InputManager.Instance.PlayerInputDTO;
+        
         _rotator.Tick();
 
         if (PlayerInputDTO.Direction != CardinalDirection.NONE)
@@ -133,7 +133,7 @@ public class Player : MonoBehaviour
         BarrierCellIndex = null;
 
         ResolvePlayerTurnInBarrierRect();
-
+        
         if (!BarrierCellIndex.HasValue)
         {
             _mover.Tick();
@@ -160,6 +160,10 @@ public class Player : MonoBehaviour
         CheckIfPlayerHitProbe();
         PlayIonSound();
 
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            Reset();
+        }
     }
 
     private void PlayIonSound()
@@ -187,7 +191,6 @@ public class Player : MonoBehaviour
         
         if (_playerCollisions.CheckPlayerRadiusWithinEntityRadius(EntityCast.Probe, radius, _probe.Radius))
         {
-            //_probe.Die();
             Die();
         }
     }
@@ -195,7 +198,7 @@ public class Player : MonoBehaviour
     private void ResolvePlayerTurnInBarrierRect()
     {
         if (_playerCollisions.CheckIfPlayerHit(EntityCast.Barrier))
-        {
+        { 
             if (HasChangedFacing())
             {
                 BarrierCellIndex = CheckPlayerContactPointsForBarriorCollision(_backContactPoints, Vector3.zero);
@@ -262,7 +265,7 @@ public class Player : MonoBehaviour
                 case WarlordState.Idle:
                     if (_warlord.CanGetAmmo)
                     {
-                        ammo += _warlord.GetAmmo();
+                        _ammo += _warlord.GetAmmo();
                     }
                     break;
                 case WarlordState.ChargeUp:
@@ -287,7 +290,7 @@ public class Player : MonoBehaviour
             }
             else
             {
-                ammo += 10; 
+                _ammo += 10; 
             }
             _cannonShot.Die();
         }
@@ -303,10 +306,10 @@ public class Player : MonoBehaviour
 
     private void DeployCannonIFPossible()
     {
-        if (!_cannonDeployed && transform.position.x <= ScreenHelper.Instance.ScreenBounds.xMin && ammo >= 10)
+        if (!_cannonDeployed && transform.position.x <= ScreenHelper.Instance.ScreenBounds.xMin && _ammo >= 10)
         {
             _cannonDeployed = true;
-            ammo -= 10;
+            _ammo -= 10;
             _cannonShot.gameObject.SetActive(true);
             _cannonShot.transform.position =
                 new Vector3(ScreenHelper.Instance.ScreenBounds.xMin + .5f, transform.position.y, 0f);
@@ -352,15 +355,18 @@ public class Player : MonoBehaviour
 
     private void FireBulletIfPossible()
     {
-        if (_fireBulletCooldownTimer > Time.time || ammo <= 0)
+        if (_fireBulletCooldownTimer > Time.time || _ammo <= 0)
             return;
 
-        if (!_bullet.isActiveAndEnabled && _playerInputDTO.FireButton == true && _canFireBullet)
+        if (!_bullet.isActiveAndEnabled && 
+            _playerInputDTO.FireButton == true && 
+            _canFireBullet &&
+            _playerInputDTO.LastFacingDirection != CardinalDirection.NONE)
         {
             _bullet.FireBullet();
             _canFireBullet = false;
             _fireBulletCooldownTimer = Time.time + bulletFireRate;
-            ammo -= 1;
+            _ammo -= 1;
             
             shotSound.PlayOneShot(_audioSource);
         }
@@ -372,7 +378,7 @@ public class Player : MonoBehaviour
         {
             _barrier.DisableCell(cellIndex);
             _eatTimer = Time.time + eatCooldownTime;
-            ammo += cellAmmoValue;
+            _ammo += cellAmmoValue;
             GameManager.Instance.AddScore(_barrier.Score(cellIndex));
         }
         eatSound.Play(_audioSource);
@@ -416,11 +422,17 @@ public class Player : MonoBehaviour
     public IEnumerator Respawn()
     {
         yield return new WaitForSeconds(.3f);
+        Debug.Log("RESPAWN SET");
         var yOffset = ScreenHelper.Instance.ScreenBounds.yMax - 2f;
         var x = ScreenHelper.Instance.ScreenBounds.xMin + 2f;
         transform.position = new Vector3(x, UnityEngine.Random.Range(-yOffset, yOffset), 0f);
         _playerDead = false; 
         GetComponentInChildren<MeshRenderer>().enabled = true;
+    }
+
+    private void UpdateBarrier( Barrier2 barrier)
+    {
+        _barrier = barrier;
     }
 
     private bool HasChangedFacing()
@@ -430,6 +442,17 @@ public class Player : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    public void Reset()
+    {
+        _playerDead = false; 
+        _ammo = 0;
+         GetComponentInChildren<MeshRenderer>().enabled = false;
+         StartCoroutine(Respawn());
+         _bullet.Reset();
+         _cannonDeployed = false;
+         _cannonShot.Reset();
     }
 
     private void OnDrawGizmos()

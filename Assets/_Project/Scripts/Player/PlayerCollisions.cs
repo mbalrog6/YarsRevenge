@@ -1,14 +1,4 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
-
-public enum EntityCast
-{
-    Player,
-    Warlord,
-    Probe, 
-    Cannon, 
-    Barrier,
-}
 
 public class PlayerCollisions
 {
@@ -25,11 +15,6 @@ public class PlayerCollisions
         _entityRects[entityCast] = entityRect;
     }
 
-    public bool CheckForRectCollision(Rect originator, Rect targetObject)
-    {
-        return originator.Overlaps(targetObject);
-    }
-    
     public bool CheckIfPlayerHit(RectContainer entity)
     {
         return _entityRects[EntityCast.Player].Bounds.Overlaps(entity.Bounds);

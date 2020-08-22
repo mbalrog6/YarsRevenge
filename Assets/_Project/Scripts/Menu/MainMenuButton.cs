@@ -1,15 +1,19 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class MainMenuButton : ShakeButton
 {
-    [SerializeField] private AudioSource _audioSource;
     [SerializeField] private SimpleAudioEvent _onEnterButtonSound;
+    [SerializeField] private SimpleAudioEvent _onClickButtonSound;
     [SerializeField] private Image _image;
     private Color _color;
-    
+    private AudioSource _audioSource;
+
+    private void Start()
+    {
+        _audioSource = AudioManager.Instance.RequestOmniPresentAudioSource();
+    }
+
     public override void OnEnter()
     {
         base.OnEnter();
@@ -29,6 +33,7 @@ public class MainMenuButton : ShakeButton
 
     public override void OnClick()
     {
+        _onClickButtonSound.PlayOneShot(_audioSource);
         GameStateMachine.Instance.ChangeTo = States.MENU;
     }
 }

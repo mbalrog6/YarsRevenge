@@ -7,17 +7,27 @@ public class Bullet : MonoBehaviour
     [SerializeField] private Transform spawnPoint;
     [SerializeField] private Player player;
     [SerializeField] private float radius = .2f;
-    [SerializeField] private Barrier barrier;
 
-    [Header("Audio")] [SerializeField] private AudioSource audioSource;
+    private Barrier2 barrier;
+    
+    [Header("Audio")]
     [SerializeField] private SimpleAudioEvent _splatterSound;
-
     private AudioSource _audioSource;
     private Vector3 _fireDirection;
-    
+
     public bool HasBeenFired { get; private set; }
 
     public event Action OnDisabled;
+
+    private void Awake()
+    {
+        _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
+    }
+
+    private void Start()
+    {
+        GameManager.Instance.OnBarrierChanged += UpdateBarrier;
+    }
 
     public void DisableBullet()
     {
@@ -65,15 +75,31 @@ public class Bullet : MonoBehaviour
             var index = barrier.GetCellFromVector3(transform.position);
             if (index.HasValue)
             {
-                _splatterSound.PlayOneShot(audioSource);
+                _splatterSound.PlayOneShot(_audioSource);
                 barrier.DisableCellsInPlusPattern(index.Value);
                 DisableBullet();
+                GameStateMachine.Instance.ChangeTo = States.BRIEF_PAUSE;
             }
         }
     }
 
     private void Move()
     {
+        if (_fireDirection == Vector3.zero)
+        {
+            DisableBullet();
+            return;
+        }
         transform.position += _fireDirection * (speed * Time.deltaTime);
+    }
+
+    private void UpdateBarrier(Barrier2 barrier)
+    {
+        this.barrier = barrier;
+    }
+
+    public void Reset()
+    {
+        DisableBullet();
     }
 }

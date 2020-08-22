@@ -34,11 +34,11 @@ public class LaunchTowardsPlayer : IState
 
     public void OnEnter()
     {
-        _entity.SetTimer(3f);
+        //_entity.SetTimer(3f);
        
         if (_player == null)
             return;
-        
+        _speed = _entity.LaunchSpeed;
         var playerPosition = _playerTransform.position;
         _luanchDirection = playerPosition - _entity.transform.position;
         _luanchDirection.Normalize();
@@ -50,5 +50,6 @@ public class LaunchTowardsPlayer : IState
     public void OnExit()
     {
         _entity.WarlordEntity.StopSound();
+        _entity.LaunchSpeedAdvancementCount++;
     }
 }

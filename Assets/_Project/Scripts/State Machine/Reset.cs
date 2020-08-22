@@ -15,6 +15,7 @@ public class Reset : IState
         if (_operation.isDone)
         {
             _stateMachine.ChangeTo = States.MENU;
+            AudioManager.Instance.StopAllSound();
         }
     }
 
@@ -22,7 +23,6 @@ public class Reset : IState
     {
         _stateMachine.CurrentState = States.RESET;
         _stateMachine.ChangeTo = States.NONE;
-        //GameObject.Destroy(GameManager.Instance.gameObject);
         _operation = SceneManager.LoadSceneAsync("MainMenu");
     }
 

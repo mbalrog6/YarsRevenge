@@ -17,7 +17,8 @@ public class GameStateMachine : MonoBehaviour
     public static GameStateMachine Instance => _instance;
     private static GameStateMachine _instance;
     public States ChangeTo { get; set; } = States.NONE;
-    
+    public float BriefPauseTime { get; set; } = .05f;
+
     private StateMachine _stateMachine;
 
     private void Awake()
@@ -36,6 +37,7 @@ public class GameStateMachine : MonoBehaviour
 
         var menu = new Menu(this);
         var pause = new Pause(this);
+        var briefPause = new BriefPause(this);
         var option = new Option();
         var play = new Play(this);
         var loading = new Loading(this);
@@ -48,6 +50,9 @@ public class GameStateMachine : MonoBehaviour
         _stateMachine.AddTransition( pause, play, () => ChangeTo == States.PLAY);
         _stateMachine.AddTransition( pause, reset, () => ChangeTo == States.MENU);
         _stateMachine.AddTransition( reset, menu, () => ChangeTo == States.MENU);
+        
+        _stateMachine.AddTransition( play, briefPause, () => ChangeTo == States.BRIEF_PAUSE);
+        _stateMachine.AddTransition( briefPause, play, () => ChangeTo == States.PLAY);
         
         _stateMachine.SetState(menu);
     }
@@ -66,5 +71,6 @@ public enum States
     MENU, 
     OPTION,
     LOADING,
-    RESET
+    RESET,
+    BRIEF_PAUSE
 }

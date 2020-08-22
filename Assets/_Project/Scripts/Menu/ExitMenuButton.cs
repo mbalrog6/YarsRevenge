@@ -1,13 +1,18 @@
-﻿using DG.Tweening;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class ExitMenuButton : ShakeButton
 {
-    [SerializeField] private AudioSource _audioSource;
     [SerializeField] private SimpleAudioEvent _onEnterButtonSound;
     [SerializeField] private Image _image;
     private Color _color;
+    private AudioSource _audioSource;
+
+    private void Start()
+    {
+        _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
+    }
+
     public override void OnEnter()
     {
         base.OnEnter();

@@ -49,9 +49,11 @@ public class IonZone : MonoBehaviour
         var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
         quad.name = "IonZone Visual";
         quad.transform.localScale = new Vector3(  3f, 16f, 1f );
-        var material = quad.GetComponent<MeshRenderer>().material;
+        var qMaterial = quad.GetComponent<MeshRenderer>();
         
-        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+        var material = new Material(Shader.Find("Standard"));
+        material.SetFloat("_Mode", 2);
+        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
         material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
         material.SetInt("_ZWrite", 0);
         material.DisableKeyword("_ALPHATEST_ON");
@@ -59,9 +61,10 @@ public class IonZone : MonoBehaviour
         material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
         material.renderQueue = 3000;
         
-        material.color = new Color(1, 1, 1, .1f);
+        material.SetColor( "_Color", new Color(.1f, .1f, .1f, .01f) );
+        qMaterial.material = material;
         quad.transform.parent = this.gameObject.transform; 
-        quad.transform.localPosition = Vector3.zero;
+        quad.transform.localPosition = new Vector3(0f, 0f, 1f);
     }
     
     private void OnDrawGizmos()

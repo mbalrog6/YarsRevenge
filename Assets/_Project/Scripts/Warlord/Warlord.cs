@@ -1,12 +1,5 @@
 ﻿using UnityEngine;
 
-public enum WarlordState
-{
-    Idle, 
-    ChargeUp, 
-    LaunchedTowardsPlayer,
-    Dead,
-}
 public class Warlord : MonoBehaviour
 {
     [SerializeField] private int ammoProvided;
@@ -15,21 +8,23 @@ public class Warlord : MonoBehaviour
     [SerializeField] private int _scoreForWarlord;
 
     [Header("Audio")]
-    [SerializeField] private AudioSource audioSource;
     [SerializeField] private SimpleAudioEvent swirlAttack;
     [SerializeField] private SimpleAudioEvent chargeUpSound;
-    public static WarlordState State { get; set; } = WarlordState.Idle;
-    public bool CanGetAmmo => Time.time > _ammoProvidedTimer;
-    public RectContainer WarlordRectContainer => _warlordBounds;
-    public int Score => Warlord.State == WarlordState.LaunchedTowardsPlayer ? _scoreForSwirl : _scoreForWarlord;
+    private AudioSource audioSource;
 
+    public static WarlordState State { get; set; } = WarlordState.Idle;
+
+    public bool CanGetAmmo => Time.time > _ammoProvidedTimer;
+    public int Score => State == WarlordState.LaunchedTowardsPlayer ? _scoreForSwirl : _scoreForWarlord;
+
+    public RectContainer WarlordRectContainer => _warlordBounds;
     private RectContainer _warlordBounds;
     private float _ammoProvidedTimer;
 
     private void Awake()
     {
         _warlordBounds = new RectContainer( this.gameObject, 1f, 1f, 1f, 1f);
-        audioSource = GetComponent<AudioSource>();
+        audioSource = AudioManager.Instance.RequestAudioSource(3);
     }
 
     private void Update()

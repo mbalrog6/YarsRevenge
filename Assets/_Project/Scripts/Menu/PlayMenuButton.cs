@@ -3,11 +3,17 @@ using UnityEngine.UI;
 
 public class PlayMenuButton : ShakeButton
 {
-    [SerializeField] private AudioSource _audioSource;
     [SerializeField] private SimpleAudioEvent _onEnterButtonSound;
+    [SerializeField] private SimpleAudioEvent _onClickButtonSound;
     [SerializeField] private Image _image;
     private Color _color;
     private bool _initalized = false;
+    private AudioSource _audioSource;
+
+    private void Start()
+    {
+        _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
+    }
 
     public override void OnEnter()
     {
@@ -33,6 +39,7 @@ public class PlayMenuButton : ShakeButton
 
     public override void OnClick()
     {
+        _onClickButtonSound.PlayOneShot(_audioSource);
         GameStateMachine.Instance.ChangeTo = States.LOADING;
     }
 }

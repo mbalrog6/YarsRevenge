@@ -4,16 +4,15 @@ using UnityEngine;
 
 public class CannonShot : MonoBehaviour
 {
-    [SerializeField] private Barrier barrier;
+    [SerializeField] private Barrier2 barrier;
     [SerializeField] private Probe probe;
     [SerializeField] private Warlord warlord;
     [SerializeField] private Transform[] contactPoints;
 
-    [Header("Audio")]
-    [SerializeField] private AudioSource audioSource;
-    [SerializeField] private SimpleAudioEvent explosion;
+    [Header("Audio")] [SerializeField] private SimpleAudioEvent explosion;
     [SerializeField] private SimpleAudioEvent cannonFire;
     [SerializeField] private SimpleAudioEvent rebound;
+    private AudioSource _audioSource;
 
     private RectContainer _collisionRect;
     private DirectionalMover _mover;
@@ -25,15 +24,17 @@ public class CannonShot : MonoBehaviour
     public Rect Bounds => _collisionRect.Bounds;
     public RectContainer CannonRectContainer => _collisionRect;
 
-    public event Action OnDie; 
+    public event Action OnDie;
 
     private void Awake()
     {
-        _collisionRect = new RectContainer( gameObject, transform.position.x, transform.position.y, .8f, .5f );
+        _collisionRect = new RectContainer(gameObject, transform.position.x, transform.position.y, .8f, .5f);
         _mover = GetComponentInChildren<DirectionalMover>();
         _yMover = GetComponentInChildren<MirrorTargetYMover>();
         HasFired = false;
         Direction = CardinalDirection.EAST;
+        _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
+        GameManager.Instance.OnBarrierChanged += UpdateBarrier;
     }
 
     private void Update()
@@ -47,8 +48,8 @@ public class CannonShot : MonoBehaviour
     private void CheckOffScreen()
     {
         if (!HasFired)
-            return; 
-        
+            return;
+
         if (!ScreenHelper.Instance.ScreenBounds.Contains(transform.position))
         {
             Die();
@@ -68,11 +69,11 @@ public class CannonShot : MonoBehaviour
                     barrier.DisableCell(index);
                 }
 
-                if (barrier.IsReflective)
+                if (barrier.BarrierComponent.BarrierInfo.IsReflective)
                 {
                     Direction = CardinalDirection.WEST;
                     _mover.Direction = Direction;
-                    rebound.PlayOneShot(audioSource);
+                    rebound.PlayOneShot(_audioSource);
                 }
                 else
                 {
@@ -92,8 +93,8 @@ public class CannonShot : MonoBehaviour
         }
 
         if (!HasFired)
-            return; 
-        
+            return;
+
         if (_collisionRect.Bounds.Overlaps(warlord.WarlordRectContainer.Bounds))
         {
             GameManager.Instance.AddScore(warlord.Score);
@@ -136,37 +137,52 @@ public class CannonShot : MonoBehaviour
 
     public void Die()
     {
-        
+        Reset();
+        OnDie?.Invoke();
+    }
+
+    public void Reset()
+    {
         _mover.enabled = false;
         _yMover.enabled = true;
         HasFired = false;
         Direction = CardinalDirection.EAST;
         _mover.Direction = CardinalDirection.EAST;
-        OnDie?.Invoke(); 
         gameObject.SetActive(false);
     }
 
     public void Fire()
     {
         EnableMover();
-        cannonFire.PlayOneShot(audioSource);
-        HasFired = true; 
+        cannonFire.PlayOneShot(_audioSource);
+        HasFired = true;
     }
 
     public void Explode()
     {
-        explosion.PlayOneShot(audioSource);
+        GameStateMachine.Instance.BriefPauseTime = .3f;
+        GameStateMachine.Instance.ChangeTo = States.BRIEF_PAUSE;
+        explosion.PlayOneShot(_audioSource);
         Die();
+    }
+
+    private void UpdateBarrier(Barrier2 barrier)
+    {
+        this.barrier = barrier;
     }
 
     private void OnDrawGizmos()
     {
         if (_collisionRect == null) return;
-        
+
         Gizmos.color = Color.blue;
-        Gizmos.DrawLine(new Vector3( _collisionRect.Bounds.xMin, _collisionRect.Bounds.yMin, 0f), new Vector3( _collisionRect.Bounds.xMin, _collisionRect.Bounds.yMax, 0f));
-        Gizmos.DrawLine(new Vector3( _collisionRect.Bounds.xMax, _collisionRect.Bounds.yMin, 0f), new Vector3( _collisionRect.Bounds.xMax, _collisionRect.Bounds.yMax, 0f));
-        Gizmos.DrawLine(new Vector3( _collisionRect.Bounds.xMin, _collisionRect.Bounds.yMin, 0f), new Vector3( _collisionRect.Bounds.xMax, _collisionRect.Bounds.yMin, 0f));
-        Gizmos.DrawLine(new Vector3( _collisionRect.Bounds.xMin, _collisionRect.Bounds.yMax, 0f), new Vector3( _collisionRect.Bounds.xMax, _collisionRect.Bounds.yMax, 0f));
+        Gizmos.DrawLine(new Vector3(_collisionRect.Bounds.xMin, _collisionRect.Bounds.yMin, 0f),
+            new Vector3(_collisionRect.Bounds.xMin, _collisionRect.Bounds.yMax, 0f));
+        Gizmos.DrawLine(new Vector3(_collisionRect.Bounds.xMax, _collisionRect.Bounds.yMin, 0f),
+            new Vector3(_collisionRect.Bounds.xMax, _collisionRect.Bounds.yMax, 0f));
+        Gizmos.DrawLine(new Vector3(_collisionRect.Bounds.xMin, _collisionRect.Bounds.yMin, 0f),
+            new Vector3(_collisionRect.Bounds.xMax, _collisionRect.Bounds.yMin, 0f));
+        Gizmos.DrawLine(new Vector3(_collisionRect.Bounds.xMin, _collisionRect.Bounds.yMax, 0f),
+            new Vector3(_collisionRect.Bounds.xMax, _collisionRect.Bounds.yMax, 0f));
     }
 }
