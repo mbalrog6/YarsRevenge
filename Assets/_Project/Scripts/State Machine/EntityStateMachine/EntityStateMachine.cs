@@ -3,7 +3,7 @@
 public class EntityStateMachine : MonoBehaviour
 {
     [SerializeField] private Player player;
-    public Warlord WarlordEntity => _warlord;
+    public Warlord QotileEntity => _qotile;
     public int ChargeTimeAdvancementCount { get; set; } = 1;
     public int LaunchSpeedAdvancementCount { get; set; } = 1;
     public float ChargeTime => _chargeTime;
@@ -13,7 +13,7 @@ public class EntityStateMachine : MonoBehaviour
     private float _timer;
     private float _pauseDelay;
     private StateMachine _stateMachine;
-    private Warlord _warlord;
+    private Warlord _qotile;
 
     [SerializeField] private QotileInfo _qotileInfo;
     private float _chargeTime;
@@ -21,27 +21,27 @@ public class EntityStateMachine : MonoBehaviour
 
     private void Awake()
     {
-        _warlord = GetComponent<Warlord>();
+        _qotile = GetComponent<Warlord>();
         
         _stateMachine = new StateMachine();
 
         var idle = new Idle(this);
         var chargeUp = new ChargeUp(this);
         var launchTowardsPlayer = new LaunchTowardsPlayer(this, player);
-        var dead = new Died( _warlord );
+        var quotileDied = new Died( _qotile );
         var reset = new ResetQotile( this );
 
         _stateMachine.AddState(idle);
         _stateMachine.AddState(chargeUp);
         _stateMachine.AddState(launchTowardsPlayer);
-        _stateMachine.AddState(dead);
+        _stateMachine.AddState(quotileDied);
 
         _stateMachine.AddTransition(idle, chargeUp, () => Time.time > _timer);
         _stateMachine.AddTransition(chargeUp, launchTowardsPlayer, () => Time.time > _timer);
         _stateMachine.AddTransition(launchTowardsPlayer, idle, () => CheckForOffScreen());
         _stateMachine.AddTransition( reset, idle, () => Warlord.State == WarlordState.Idle);
 
-        _stateMachine.AddAnyStateTransition(dead, () => Warlord.State == WarlordState.Dead);
+        _stateMachine.AddAnyStateTransition(quotileDied, () => Warlord.State == WarlordState.Dead);
         _stateMachine.AddAnyStateTransition(reset, () => Warlord.State == WarlordState.Reset);
 
         _stateMachine.SetState(idle);

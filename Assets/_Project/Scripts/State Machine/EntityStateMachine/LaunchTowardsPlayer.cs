@@ -29,7 +29,7 @@ public class LaunchTowardsPlayer : IState
             return;
         
         _entity.transform.position += _luanchDirection * (_speed * Time.deltaTime);
-        _entity.WarlordEntity.PlayLaunchAtSound();
+        _entity.QotileEntity.PlayLaunchAtSound();
     }
 
     public void OnEnter()
@@ -44,12 +44,12 @@ public class LaunchTowardsPlayer : IState
         _luanchDirection.Normalize();
         
         Warlord.State = WarlordState.LaunchedTowardsPlayer;
-        _entity.WarlordEntity.PlayLaunchAtSound();
+        _entity.QotileEntity.PlayLaunchAtSound();
     }
 
     public void OnExit()
     {
-        _entity.WarlordEntity.StopSound();
+        _entity.QotileEntity.StopSound();
         _entity.LaunchSpeedAdvancementCount++;
     }
 }

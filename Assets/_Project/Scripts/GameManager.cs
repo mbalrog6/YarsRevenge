@@ -4,8 +4,12 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    [Header( "Level Prefabs" )]
     [SerializeField] private Barrier2 _barrier;
-    [SerializeField] private EntityStateMachine _entityStateMachine; 
+    [SerializeField] private EntityStateMachine _entityStateMachine;
+    [SerializeField] private Probe _probe;
+    [Space(10)]
+    
     [SerializeField] private GameObject _barrierCell;
     [SerializeField] private LevelInfo[] levelData;
     public static GameManager Instance => _instance;
@@ -26,7 +30,6 @@ public class GameManager : MonoBehaviour
     private int _level;
 
     private BarrierFactory _barrierFactory;
-    [SerializeField] private BarrierInfo _barrierInfo;
 
     private void Awake()
     {
@@ -55,6 +58,10 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         //DebugText.Instance.SetText($"Lives = [{Lives}] Score = {Score}");
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            AdvanceToNextLevel();
+        }
     }
 
     private void InitializeStartValues()
@@ -91,8 +98,19 @@ public class GameManager : MonoBehaviour
         _barrier.transform.position = position;
     }
 
+    public void AddLife( int value)
+    {
+        _lives += value; 
+        OnLivesChanged?.Invoke(_lives);
+    }
+
     public void AdvanceToNextLevel()
     {
+        if (_barrier != null)
+        {
+            Destroy(_barrier.gameObject);
+        }
+        
         _level++;
         
         _barrier = _barrierFactory.GetBarrier(levelData[_level].BarrierInfo).GetComponent<Barrier2>();
@@ -100,6 +118,8 @@ public class GameManager : MonoBehaviour
         
         _entityStateMachine.LoadNewQotileInfo(levelData[_level].QotileInfo);
         
+        _probe.Reset(levelData[_level].ProbeInfo);
+
         OnBarrierChanged?.Invoke(_barrier);
     }
 }

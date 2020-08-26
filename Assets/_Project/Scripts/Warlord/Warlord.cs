@@ -20,6 +20,7 @@ public class Warlord : MonoBehaviour
     public RectContainer WarlordRectContainer => _warlordBounds;
     private RectContainer _warlordBounds;
     private float _ammoProvidedTimer;
+    private Vector3 _offscreenPosition = new Vector3(100f, 100f, 0f );
 
     private void Awake()
     {
@@ -40,10 +41,12 @@ public class Warlord : MonoBehaviour
 
     public void Die()
     {
+        GameStateMachine.Instance.ChangeTo = State == WarlordState.LaunchedTowardsPlayer ? States.SWIRLDEATH : States.QOTILEDEATH;
         State = WarlordState.Dead;
+        transform.position = _offscreenPosition; 
     }
 
-    public void StopSound()
+    public void StopSound() 
     {
         audioSource.Stop();
     }

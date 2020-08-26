@@ -42,6 +42,9 @@ public class GameStateMachine : MonoBehaviour
         var play = new Play(this);
         var loading = new Loading(this);
         var reset = new Reset(this );
+        var swirlDeath = new SwirlDeath( this );
+        var qotileDeath = new QotileDeath(this);
+        var advanceLevel = new AdvanceLevel(this);
         
         _stateMachine.AddTransition( menu, loading, () => ChangeTo == States.LOADING);
         _stateMachine.AddTransition( loading, play, () => loading.IsFinished);
@@ -53,6 +56,12 @@ public class GameStateMachine : MonoBehaviour
         
         _stateMachine.AddTransition( play, briefPause, () => ChangeTo == States.BRIEF_PAUSE);
         _stateMachine.AddTransition( briefPause, play, () => ChangeTo == States.PLAY);
+        
+        _stateMachine.AddTransition( play, swirlDeath, () => ChangeTo == States.SWIRLDEATH);
+        _stateMachine.AddTransition( play, qotileDeath, () => ChangeTo == States.QOTILEDEATH);
+        _stateMachine.AddTransition( advanceLevel, play, () => ChangeTo == States.PLAY);
+        
+        _stateMachine.AddAnyStateTransition( advanceLevel, () => ChangeTo == States.ADVANCE_LEVEL);
         
         _stateMachine.SetState(menu);
     }
@@ -72,5 +81,8 @@ public enum States
     OPTION,
     LOADING,
     RESET,
-    BRIEF_PAUSE
+    BRIEF_PAUSE,
+    SWIRLDEATH,
+    QOTILEDEATH,
+    ADVANCE_LEVEL
 }

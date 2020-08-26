@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 87f8f44cf28a4a2a9ff82e92ed63df88, type: 3}
-  m_Name: BarrierInfo-1
+  m_Name: Barrier-2
   m_EditorClassIdentifier: 
-  BarrierIndex: 0
-  IsReflective: 0
-  ShiftPattern: 0
-  BarrierShiftPulseTime: 0
+  BarrierIndex: 2
+  IsReflective: 1
+  ShiftPattern: 1
+  BarrierShiftPulseTime: 0.08

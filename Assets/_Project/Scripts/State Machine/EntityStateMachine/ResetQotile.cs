@@ -8,13 +8,14 @@
     }
     public void Tick()
     {
-        
+        Warlord.State = WarlordState.Idle;
+        _stateMachine.ResetQotile();
     }
 
     public void OnEnter()
     {
-        Warlord.State = WarlordState.Idle;
-        _stateMachine.ResetQotile();
+        
+       
     }
 
     public void OnExit()

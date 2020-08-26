@@ -8,16 +8,13 @@
     }
     public void Tick()
     {
-        
     }
 
     public void OnEnter()
     {
-        warlord.gameObject.SetActive(false);
     }
 
     public void OnExit()
     {
-        
     }
 }

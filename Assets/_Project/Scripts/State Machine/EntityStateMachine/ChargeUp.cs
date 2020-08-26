@@ -37,7 +37,7 @@ public class ChargeUp : IState
 
         _material.color = _colorChoice ? _color1 : _color2;
         _transform.position = _barrier.WarlordSpawnPoint;
-        _entity.WarlordEntity.PlayChargingSound();
+        _entity.QotileEntity.PlayChargingSound();
 
     }
 
@@ -45,12 +45,12 @@ public class ChargeUp : IState
     {
         _entity.SetTimer(_entity.ChargeTime);
         Warlord.State = WarlordState.ChargeUp;
-        _entity.WarlordEntity.PlayChargingSound();
+        _entity.QotileEntity.PlayChargingSound();
     }
 
     public void OnExit()
     {
-        _entity.WarlordEntity.StopSound();
+        _entity.QotileEntity.StopSound();
         _entity.ChargeTimeAdvancementCount++;
     }
     
