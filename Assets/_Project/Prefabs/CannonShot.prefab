@@ -106,15 +106,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ff06c5f32a6d864db26bff758609e8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  barrier: {fileID: 3825932770151290168, guid: 56a54ae7bdf29ad4aa6ac949e10a7721, type: 3}
+  barrier: {fileID: 0}
   probe: {fileID: 7333628603504626577, guid: c36e125874eaa914c9e788157ae9da1d, type: 3}
-  warlord: {fileID: 6257686218173660780, guid: ce1fe2165b8188443be2c1dea0bc56fa, type: 3}
+  qotile: {fileID: 6257686218173660780, guid: ce1fe2165b8188443be2c1dea0bc56fa, type: 3}
   contactPoints:
   - {fileID: 7011470092068236206}
   - {fileID: 7011470091092283006}
   - {fileID: 7011470090262685035}
-  audioSource: {fileID: 551867934432931543, guid: b36a27dbec25c8844a5f8018adba2e6f,
-    type: 3}
   explosion: {fileID: 11400000, guid: 9e29c987aa8fc394480d7a24eb141398, type: 2}
   cannonFire: {fileID: 11400000, guid: 0e81d4d509513344286c54e0155b1978, type: 2}
   rebound: {fileID: 11400000, guid: 1502b6c1840b56043846bfd12ad2721c, type: 2}

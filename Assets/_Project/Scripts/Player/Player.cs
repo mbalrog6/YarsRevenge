@@ -139,7 +139,7 @@ public class Player : MonoBehaviour
             _mover.Tick();
             _playerRectContainer.UpdateToTargetPosition();
         }
-        
+
         DidPlayerHitBarrierCell();
         CheckIfWarlordHitPlayer();
         CheckIfCannonHitPlayer();
@@ -159,11 +159,6 @@ public class Player : MonoBehaviour
 
         CheckIfPlayerHitProbe();
         PlayIonSound();
-
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            Reset();
-        }
     }
 
     private void PlayIonSound()

@@ -6,7 +6,7 @@ public class CannonShot : MonoBehaviour
 {
     [SerializeField] private Barrier2 barrier;
     [SerializeField] private Probe probe;
-    [SerializeField] private Warlord warlord;
+    [SerializeField] private Warlord qotile;
     [SerializeField] private Transform[] contactPoints;
 
     [Header("Audio")] [SerializeField] private SimpleAudioEvent explosion;
@@ -56,7 +56,42 @@ public class CannonShot : MonoBehaviour
         }
     }
 
+    #region Collisions...
     private void CheckForCollisions()
+    {
+        CheckForBarrierCollision();
+        CheckForProbeCollision();
+
+        if (this.HasFired)
+        {
+            CheckForQotileCollision();
+        }
+    }
+
+    private void CheckForQotileCollision()
+    {
+        if (_collisionRect.Bounds.Overlaps(qotile.WarlordRectContainer.Bounds))
+        {
+            GameManager.Instance.AddScore(qotile.Score);
+            Explode();
+            qotile.Die();
+        }
+    }
+
+    private void CheckForProbeCollision()
+    {
+        if (!probe.IsDead)
+        {
+            if (_collisionRect.Bounds.Overlaps(probe.ProbeRectContainer.Bounds))
+            {
+                Explode();
+                probe.Die();
+                GameManager.Instance.AddScore(probe.Score);
+            }
+        }
+    }
+
+    private void CheckForBarrierCollision()
     {
         if (_collisionRect.Bounds.Overlaps(barrier.BarrierRectContainer.Bounds) && Direction == CardinalDirection.EAST)
         {
@@ -81,27 +116,8 @@ public class CannonShot : MonoBehaviour
                 }
             }
         }
-
-        if (!probe.IsDead)
-        {
-            if (_collisionRect.Bounds.Overlaps(probe.ProbeRectContainer.Bounds))
-            {
-                Explode();
-                probe.Die();
-                GameManager.Instance.AddScore(probe.Score);
-            }
-        }
-
-        if (!HasFired)
-            return;
-
-        if (_collisionRect.Bounds.Overlaps(warlord.WarlordRectContainer.Bounds))
-        {
-            GameManager.Instance.AddScore(warlord.Score);
-            Explode();
-            warlord.Die();
-        }
     }
+    #endregion
 
     private void CheckCannonShotContactPointsForBarriorCollision(Transform[] contactPoints, Vector3 offset)
     {

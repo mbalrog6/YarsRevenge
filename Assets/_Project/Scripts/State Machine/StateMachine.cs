@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class StateMachine
 {
-    private IState _currentState;
+    public IState _currentState { get; private set; }
     private List<IState> _states = new List<IState>();
     private List<StateTransition> _anyStateTransitions =  new List<StateTransition>();
     private Dictionary<IState, List<StateTransition>> _stateTransitons = new Dictionary<IState, List<StateTransition>>();

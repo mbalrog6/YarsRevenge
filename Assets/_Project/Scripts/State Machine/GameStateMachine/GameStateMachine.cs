@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameStateMachine : MonoBehaviour
 {
@@ -20,6 +22,8 @@ public class GameStateMachine : MonoBehaviour
     public float BriefPauseTime { get; set; } = .05f;
 
     private StateMachine _stateMachine;
+    private IState _briefPause;
+    private bool _subscribe = true;
 
     private void Awake()
     {
@@ -37,7 +41,7 @@ public class GameStateMachine : MonoBehaviour
 
         var menu = new Menu(this);
         var pause = new Pause(this);
-        var briefPause = new BriefPause(this);
+        _briefPause = new BriefPause(this);
         var option = new Option();
         var play = new Play(this);
         var loading = new Loading(this);
@@ -54,8 +58,8 @@ public class GameStateMachine : MonoBehaviour
         _stateMachine.AddTransition( pause, reset, () => ChangeTo == States.MENU);
         _stateMachine.AddTransition( reset, menu, () => ChangeTo == States.MENU);
         
-        _stateMachine.AddTransition( play, briefPause, () => ChangeTo == States.BRIEF_PAUSE);
-        _stateMachine.AddTransition( briefPause, play, () => ChangeTo == States.PLAY);
+        _stateMachine.AddTransition( play, _briefPause, () => ChangeTo == States.BRIEF_PAUSE);
+        _stateMachine.AddTransition( _briefPause, play, () => ChangeTo == States.PLAY);
         
         _stateMachine.AddTransition( play, swirlDeath, () => ChangeTo == States.SWIRLDEATH);
         _stateMachine.AddTransition( play, qotileDeath, () => ChangeTo == States.QOTILEDEATH);
@@ -69,6 +73,42 @@ public class GameStateMachine : MonoBehaviour
     private void Update()
     {
         _stateMachine.Tick();
+
+        if (!_subscribe)
+            return;
+
+        if (IsScene_CurrentlyLoaded("UI") && Mediator.Instance != null )
+        {
+            Mediator.Instance.Subscribe<ShowDialogueCommand>(HandleShowDialogue);
+            Mediator.Instance.Subscribe<HideDialogueCommand>(HandleHideDialogue);
+            _subscribe = false; 
+        }
+    }
+    
+    private bool IsScene_CurrentlyLoaded(string sceneName_no_extention)
+    {
+        for (int i = 0; i < SceneManager.sceneCount; ++i)
+        {
+            Scene scene = SceneManager.GetSceneAt(i);
+            if (scene.name == sceneName_no_extention)
+            {
+                //the scene is already loaded
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void HandleShowDialogue(ShowDialogueCommand command)
+    {
+        BriefPauseTime = float.MaxValue;
+        ChangeTo = States.BRIEF_PAUSE;
+    }
+
+    private void HandleHideDialogue(HideDialogueCommand command)
+    {
+        ChangeTo = States.PLAY;
     }
 }
 
