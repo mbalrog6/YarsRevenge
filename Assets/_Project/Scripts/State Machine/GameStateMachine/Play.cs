@@ -21,8 +21,6 @@ public class Play : IState
         _stateMachine.CurrentState = States.PLAY;
         _stateMachine.ChangeTo = States.NONE;
         
-        Mediator.Instance.Publish<ShowDialogueCommand>(new ShowDialogueCommand());
-        DialogueManager.Instance.ShowNextStoryElement();
         Debug.Log( $"In Play Enter");
     }
 

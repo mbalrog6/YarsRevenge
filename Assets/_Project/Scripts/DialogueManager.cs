@@ -9,7 +9,7 @@ using UnityEngine;
 public class DialogueManager : MonoBehaviour
 {
     [SerializeField] private GameObject dialoguePanel;
-    [SerializeField] private TextAsset _inkJSON;
+    [SerializeField] private TextAsset[] _inkJSONs;
     
     [Header("Audio")]
     [SerializeField] private SimpleAudioEvent typingSound;
@@ -23,6 +23,7 @@ public class DialogueManager : MonoBehaviour
     private TextMeshProUGUI _continueButton;
     private Coroutine _teletypeCoroutine;
     private Story _story;
+    private int _storyIndex;
 
     private void Awake()
     {
@@ -34,7 +35,7 @@ public class DialogueManager : MonoBehaviour
             IsVisible = false;
             _dialogueText = dialoguePanel.GetComponentInChildren<TextMeshProUGUI>();
             _continueButton = dialoguePanel.GetComponentsInChildren<TextMeshProUGUI>()[1];
-            _story = new Story(_inkJSON.text);
+            _story = new Story(_inkJSONs[_storyIndex].text);
             dialoguePanel.SetActive(false);
             _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
         }
@@ -47,6 +48,18 @@ public class DialogueManager : MonoBehaviour
     private void Start()
     {
         Mediator.Instance.Subscribe<NextDialogueChunk>(HandleNextDialogueChunk);
+        Mediator.Instance.Subscribe<ShowDialogueCommand>(HandleShowDialogue);
+        Mediator.Instance.Subscribe<HideDialogueCommand>(HandleHideDialogue);
+    }
+
+    private void HandleHideDialogue(HideDialogueCommand command)
+    {
+        StartCoroutine(DelayedIsVisible(.6f));
+    }
+
+    private void HandleShowDialogue(ShowDialogueCommand command)
+    {
+        IsVisible = true;
     }
 
     public void ShowNextStoryElement()
@@ -71,6 +84,15 @@ public class DialogueManager : MonoBehaviour
             else
             {
                 Mediator.Instance.Publish(new HideDialogueCommand());
+                if (_inkJSONs.Length > _storyIndex)
+                {
+                    _storyIndex++;
+                    if (_storyIndex < _inkJSONs.Length)
+                    {
+                        _story = new Story(_inkJSONs[_storyIndex].text);
+                    }
+                }
+                Debug.Log("Hiding the Dialogue");
             }
         }
         else
@@ -134,5 +156,11 @@ public class DialogueManager : MonoBehaviour
             yield return new WaitForSeconds(typeSpeed);
             Debug.Log("Waiting for .05 seconds");
         }
+    }
+
+    private IEnumerator DelayedIsVisible(float time)
+    {
+        yield return new WaitForSeconds(time);
+        IsVisible = false;
     }
 }

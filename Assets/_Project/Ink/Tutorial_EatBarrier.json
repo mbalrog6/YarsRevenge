@@ -1,0 +1,1 @@
+﻿{"inkVersion":19,"root":[["^Hurry Up Yars!","\n","ev","str","^Continue","/str","/ev",{"*":"0.c-0","flg":20},{"c-0":["^ ",{"->":"paragraph_01"},"\n",{"->":"0.g-0"},{"#f":5}],"g-0":["done",{"#f":5}]}],"done",{"paragraph_01":["^You need to eat through that Barrier so we can kill the Qutile!","\n","end",{"#f":1}],"#f":1}],"listDefs":{}}

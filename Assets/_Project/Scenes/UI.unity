@@ -1004,7 +1004,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dialoguePanel: {fileID: 1751192221}
-  _inkJSON: {fileID: 4900000, guid: 052224c272baed84ba695f531ab71d6b, type: 3}
+  _inkJSONs:
+  - {fileID: 4900000, guid: 2495de17c8dcd464f95ecef3aae85323, type: 3}
+  - {fileID: 4900000, guid: 7f0a25fdd10bf93459502632f3df3508, type: 3}
+  - {fileID: 4900000, guid: a0d8f0d99ad276b44b1e62ba39f67488, type: 3}
+  - {fileID: 4900000, guid: b50bb6e67f84e8e4a90f4113f5a79e90, type: 3}
   typingSound: {fileID: 11400000, guid: 5de4a8edd725f6f458048ce21ee3e738, type: 2}
 --- !u!1001 &7715836091709627991
 PrefabInstance:

@@ -21,7 +21,7 @@ public class MoveForward2D : MonoBehaviour
 
     private void Update()
     {
-        if (GameStateMachine.Instance.CurrentState == States.PAUSE)
+        if (GameStateMachine.Instance.CurrentState == States.PAUSE || GameStateMachine.Instance.CurrentState == States.BRIEF_PAUSE)
         {
             return;
         }

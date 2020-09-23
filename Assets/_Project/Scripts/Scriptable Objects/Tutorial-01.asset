@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1c5935a0d98c804488e258ca7032b08, type: 3}
+  m_Name: Tutorial-01
+  m_EditorClassIdentifier: 
+  QotileInfo: {fileID: 11400000, guid: 1dcf49929a4e96741a1489b7c4f58c2a, type: 2}
+  ProbeInfo: {fileID: 11400000, guid: ebbb629135832e44095fec0e10d7a18a, type: 2}
+  BarrierInfo: {fileID: 11400000, guid: 77bfcf1eb8f9841449b474d6fe0efbe9, type: 2}
+  HasIonField: 0

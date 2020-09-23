@@ -180,11 +180,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _barrier: {fileID: 0}
+  _player: {fileID: 1324977374}
   _entityStateMachine: {fileID: 6257686216862997657}
   _probe: {fileID: 1772090781}
+  _ionZone: {fileID: 2087393520}
   _barrierCell: {fileID: 2912317923380175874, guid: 9d0ffcdadcf9d9e4bbf904efb377e87b,
     type: 3}
   levelData:
+  - {fileID: 11400000, guid: f5f700816a6d6b243b815d04341e4fd9, type: 2}
   - {fileID: 11400000, guid: 4da2e1706df27114e9c758a0e37e1c8f, type: 2}
   - {fileID: 11400000, guid: 68335540e27b9594293f88e7d308f6cd, type: 2}
 --- !u!1 &301654238
@@ -957,12 +960,12 @@ PrefabInstance:
     - target: {fileID: 551867934432931560, guid: b36a27dbec25c8844a5f8018adba2e6f,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3.02
+      value: -9.1
       objectReference: {fileID: 0}
     - target: {fileID: 551867934432931560, guid: b36a27dbec25c8844a5f8018adba2e6f,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 3.3
+      value: -0.01
       objectReference: {fileID: 0}
     - target: {fileID: 551867934432931560, guid: b36a27dbec25c8844a5f8018adba2e6f,
         type: 3}

@@ -24,6 +24,8 @@ public class Player : MonoBehaviour
     [SerializeField] private SimpleAudioEvent eatSound;
     [SerializeField] private SimpleAudioEvent dieSound;
     [SerializeField] private SimpleAudioEvent ionCloudAudio;
+
+    [SerializeField] private MeshRenderer PlayerQuad;
     
     public event Action OnDie;
 
@@ -41,6 +43,8 @@ public class Player : MonoBehaviour
 
     public IPlayerInput PlayerInput { get; set; }
     public InputDTO PlayerInputDTO => _playerInputDTO;
+    public int Ammo => _ammo;
+    private float _suppressShotTimer;
 
     private Vector3 _startPosition;
     private InputDTO _playerInputDTO;
@@ -54,7 +58,7 @@ public class Player : MonoBehaviour
     private float _fireBulletCooldownTimer;
     private bool _cannonDeployed;
     private int _ammo;
-    
+
     private float _warlordAmmoTimer;
     private bool _playerDead = false;
     private AudioSource _audioSource;
@@ -81,20 +85,21 @@ public class Player : MonoBehaviour
         _ionCloud = AudioManager.Instance.RequestAudioSource(2);
 
         _ammo = 0;
+        
+        _playerRectContainer = new RectContainer(this.gameObject, 10, 10, 1f, 1f);
+        _playerCollisions = new PlayerCollisions(_playerRectContainer);
         GameManager.Instance.OnBarrierChanged += UpdateBarrier;
     }
 
     private void Start()
     {
-        _playerRectContainer = new RectContainer(this.gameObject, 10, 10, 1f, 1f);
-        _playerCollisions = new PlayerCollisions(_playerRectContainer);
         _playerCollisions.AddEntityRect(EntityCast.Cannon, _cannonShot.CannonRectContainer);
-        _playerCollisions.AddEntityRect(EntityCast.Barrier, _barrier.BarrierRectContainer);
         _playerCollisions.AddEntityRect(EntityCast.Warlord, _warlord.WarlordRectContainer);
         _playerCollisions.AddEntityRect(EntityCast.Probe, _probe.ProbeRectContainer);
         
         _bullet.DisableBullet();
         _cannonShot.gameObject.SetActive(false);
+        _playerInputDTO = InputManager.Instance.PlayerInputDTO;
     }
 
     private void Handle_CannonShotOnDie()
@@ -192,6 +197,9 @@ public class Player : MonoBehaviour
 
     private void ResolvePlayerTurnInBarrierRect()
     {
+        if (!_playerCollisions.HasEntityRect(EntityCast.Barrier))
+            return; 
+        
         if (_playerCollisions.CheckIfPlayerHit(EntityCast.Barrier))
         { 
             if (HasChangedFacing())
@@ -201,9 +209,18 @@ public class Player : MonoBehaviour
                 {
                     
                     _barrier.SetCellColor(BarrierCellIndex.Value, Color.magenta);
-                    var offsetVector =
-                        CardinalDirections.GetUnitVectorFromCardinalDirection(
-                            CardinalDirections.GetOppisiteDirection(_playerInputDTO.Direction)) * .25f;
+                    var direction = CardinalDirections.GetOppisiteDirection(_playerInputDTO.Direction);
+                    if (direction == CardinalDirection.EAST)
+                    {
+                        direction = CardinalDirection.WEST;
+                    } else if (direction == CardinalDirection.NORTH_EAST)
+                    {
+                        direction = CardinalDirection.NORTH_WEST;
+                    } else if (direction == CardinalDirection.SOUTH_EAST)
+                    {
+                        direction = CardinalDirection.SOUTH_WEST;
+                    }
+                    var offsetVector = CardinalDirections.GetUnitVectorFromCardinalDirection(direction) * .25f;
                     BarrierCellIndex = CheckPlayerContactPointsForBarriorCollision(_frontContactPoints, offsetVector);
                     if (BarrierCellIndex.HasValue)
                     {
@@ -219,17 +236,33 @@ public class Player : MonoBehaviour
 
     private void DidPlayerHitBarrierCell()
     {
+        if (!_playerCollisions.HasEntityRect(EntityCast.Barrier))
+            return; 
+        
         if (_playerCollisions.CheckIfPlayerHit(EntityCast.Barrier))
         {
+            PlayerQuad.material.color = Color.red;
             var offsetVector =
                 CardinalDirections.GetUnitVectorFromCardinalDirection(
                     CardinalDirections.GetOppisiteDirection(_playerInputDTO.Direction)) * .2f;
             BarrierCellIndex = CheckPlayerContactPointsForBarriorCollision(_frontContactPoints, offsetVector);
             if (BarrierCellIndex.HasValue)
             {
-                transform.position = _startPosition +
-                                     CardinalDirections.GetUnitVectorFromCardinalDirection(
-                                         CardinalDirections.GetOppisiteDirection(_playerInputDTO.LastFacingDirection)) * _reboundDistance;
+                var reboundDistance = _reboundDistance;
+                var direction = CardinalDirections.GetOppisiteDirection(_playerInputDTO.LastFacingDirection);
+                if (direction == CardinalDirection.EAST)
+                {
+                    direction = CardinalDirection.WEST;
+                    reboundDistance = 0;
+                } else if (direction == CardinalDirection.NORTH_EAST)
+                {
+                    direction = CardinalDirection.NORTH;
+                } else if (direction == CardinalDirection.SOUTH_EAST)
+                {
+                    direction = CardinalDirection.SOUTH;
+                }
+                
+                transform.position = _startPosition + CardinalDirections.GetUnitVectorFromCardinalDirection(direction) * reboundDistance;
                 EatCell(BarrierCellIndex.Value);
                 _playerRectContainer.UpdateToTargetPosition();
             }
@@ -240,11 +273,28 @@ public class Player : MonoBehaviour
                 BarrierCellIndex = CheckPlayerContactPointsForBarriorCollision(_backContactPoints, offsetVector);
                 if (BarrierCellIndex.HasValue)
                 {
+                    var reboundDistance = _reboundDistance;
+                    var direction = _playerInputDTO.LastFacingDirection;
+                    if (direction == CardinalDirection.EAST)
+                    {
+                        direction = CardinalDirection.WEST;
+                        reboundDistance = 0;
+                    } else if (direction == CardinalDirection.NORTH_EAST)
+                    {
+                        direction = CardinalDirection.NORTH;
+                    } else if (direction == CardinalDirection.SOUTH_EAST)
+                    {
+                        direction = CardinalDirection.SOUTH;
+                    }
                     transform.position = _startPosition +
-                                         CardinalDirections.GetUnitVectorFromCardinalDirection(_playerInputDTO.LastFacingDirection) * _reboundDistance;
+                                         CardinalDirections.GetUnitVectorFromCardinalDirection(direction) * reboundDistance;
                     _playerRectContainer.UpdateToTargetPosition();
                 }
             }
+        }
+        else
+        {
+            PlayerQuad.material.color = Color.white;
         }
     }
 
@@ -346,11 +396,10 @@ public class Player : MonoBehaviour
 
         transform.position = new Vector3(x, y, 0f);
     }
-
-
+    
     private void FireBulletIfPossible()
     {
-        if (_fireBulletCooldownTimer > Time.time || _ammo <= 0)
+        if (_fireBulletCooldownTimer > Time.time || _ammo <= 0 )
             return;
 
         if (!_bullet.isActiveAndEnabled && 
@@ -428,6 +477,7 @@ public class Player : MonoBehaviour
     private void UpdateBarrier( Barrier2 barrier)
     {
         _barrier = barrier;
+        ChangeBarrierRef(_barrier);
     }
 
     private bool HasChangedFacing()
@@ -448,6 +498,12 @@ public class Player : MonoBehaviour
          _bullet.Reset();
          _cannonDeployed = false;
          _cannonShot.Reset();
+    }
+
+    public void ChangeBarrierRef(Barrier2 barrier)
+    {
+        _playerCollisions.RemoveEntityRect(EntityCast.Barrier);
+        _playerCollisions.AddEntityRect(EntityCast.Barrier, _barrier.BarrierRectContainer);
     }
 
     private void OnDrawGizmos()

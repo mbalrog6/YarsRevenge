@@ -15,6 +15,19 @@ public class PlayerCollisions
         _entityRects[entityCast] = entityRect;
     }
 
+    public void RemoveEntityRect(EntityCast entityCast)
+    {
+        if (_entityRects.ContainsKey(entityCast))
+        {
+            _entityRects.Remove(entityCast);
+        }
+    }
+
+    public bool HasEntityRect(EntityCast entityCast)
+    {
+        return _entityRects.ContainsKey(entityCast);
+    }
+
     public bool CheckIfPlayerHit(RectContainer entity)
     {
         return _entityRects[EntityCast.Player].Bounds.Overlaps(entity.Bounds);

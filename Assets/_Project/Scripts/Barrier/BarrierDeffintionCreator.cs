@@ -33,7 +33,7 @@ public class BarrierDeffintionCreator
 
     private void LoadBarrierData()
     {
-        var files = Directory.GetFiles(Application.dataPath + "/Resources/Data/", "*.txt");
+        var files = Directory.GetFiles(Application.streamingAssetsPath, "*.txt");
 
         foreach (var file in files)
         {

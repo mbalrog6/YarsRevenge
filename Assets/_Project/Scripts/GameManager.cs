@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    [Header( "Level Prefabs" )]
-    [SerializeField] private Barrier2 _barrier;
+    [Header("Level Prefabs")] [SerializeField]
+    private Barrier2 _barrier;
+
+    [SerializeField] private Player _player;
     [SerializeField] private EntityStateMachine _entityStateMachine;
     [SerializeField] private Probe _probe;
-    [Space(10)]
-    
-    [SerializeField] private GameObject _barrierCell;
+    [SerializeField] private IonZone _ionZone;
+    [Space(10)] [SerializeField] private GameObject _barrierCell;
     [SerializeField] private LevelInfo[] levelData;
     public static GameManager Instance => _instance;
     private static GameManager _instance;
@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
     public event Action<int> OnLevelChanged;
     public event Action<int> OnLivesChanged;
 
+    public bool TutorialActive { get; set; } = true;
     public int Lives => _lives;
     public long Score => _score;
     public int Level => _level;
@@ -28,6 +29,10 @@ public class GameManager : MonoBehaviour
     private long _score;
     private int _lives;
     private int _level;
+    private int _tutorialIndex;
+    private float _tutorialTimer;
+    private bool _tutorialTimerSet = false;
+    private float _pausedTime;
 
     private BarrierFactory _barrierFactory;
 
@@ -47,6 +52,7 @@ public class GameManager : MonoBehaviour
 
             _barrierFactory.LoadBarriersInMemory();
             _level = -1;
+            _tutorialIndex = 0;
         }
     }
 
@@ -61,6 +67,69 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.L))
         {
             AdvanceToNextLevel();
+        }
+
+        if (GameStateMachine.Instance.CurrentState == States.BRIEF_PAUSE ||
+            GameStateMachine.Instance.CurrentState == States.PAUSE)
+        {
+            _pausedTime += Time.deltaTime;
+            return;
+        }
+        else if (_pausedTime > 0)
+        {
+            _tutorialTimer += _pausedTime;
+            _pausedTime = 0;
+        }
+        
+
+        if (TutorialActive && GameStateMachine.Instance.CurrentState == States.PLAY)
+        {
+            if (_tutorialIndex == 0 && DialogueManager.Instance.IsVisible == false )
+            {
+                Mediator.Instance.Publish<ShowDialogueCommand>(new ShowDialogueCommand());
+                DialogueManager.Instance.ShowNextStoryElement();
+                _tutorialIndex = 1;
+            }
+
+            if (_tutorialIndex == 1 && DialogueManager.Instance.IsVisible == false )
+            {
+                if (_tutorialTimerSet == false)
+                {
+                    _tutorialTimer = Time.time + 5f;
+                    _tutorialTimerSet = true;
+                }
+                else if (Time.time > _tutorialTimer)
+                {
+                    if (_player.Ammo <= 0)
+                    {
+                        Mediator.Instance.Publish<ShowDialogueCommand>(new ShowDialogueCommand());
+                        DialogueManager.Instance.ShowNextStoryElement();
+                        
+                    }
+                    _tutorialIndex = 2;
+                    _tutorialTimerSet = false;
+                }
+            }
+
+            if (_tutorialIndex == 2 && DialogueManager.Instance.IsVisible == false )
+            {
+                if (_player.Ammo >= 1)
+                {
+                    Mediator.Instance.Publish<ShowDialogueCommand>(new ShowDialogueCommand());
+                    DialogueManager.Instance.ShowNextStoryElement();
+                    _tutorialIndex = 3;
+                }
+            }
+
+            if (_tutorialIndex == 3 && DialogueManager.Instance.IsVisible == false )
+            {
+                if( _player.Ammo > 15 )
+                {
+                    Mediator.Instance.Publish<ShowDialogueCommand>(new ShowDialogueCommand());
+                    DialogueManager.Instance.ShowNextStoryElement();
+                    _tutorialIndex = 4;
+                }
+            }
         }
     }
 
@@ -98,9 +167,9 @@ public class GameManager : MonoBehaviour
         _barrier.transform.position = position;
     }
 
-    public void AddLife( int value)
+    public void AddLife(int value)
     {
-        _lives += value; 
+        _lives += value;
         OnLivesChanged?.Invoke(_lives);
     }
 
@@ -110,15 +179,23 @@ public class GameManager : MonoBehaviour
         {
             Destroy(_barrier.gameObject);
         }
-        
+
         _level++;
-        
+
         _barrier = _barrierFactory.GetBarrier(levelData[_level].BarrierInfo).GetComponent<Barrier2>();
         SetBarrierPosition();
-        
+
         _entityStateMachine.LoadNewQotileInfo(levelData[_level].QotileInfo);
-        
+
         _probe.Reset(levelData[_level].ProbeInfo);
+        if (levelData[_level].HasIonField)
+        {
+            _ionZone.gameObject.SetActive(true);
+        }
+        else
+        {
+            _ionZone.gameObject.SetActive(false);
+        }
 
         OnBarrierChanged?.Invoke(_barrier);
     }

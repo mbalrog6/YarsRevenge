@@ -78,6 +78,7 @@ public class Bullet : MonoBehaviour
                 _splatterSound.PlayOneShot(_audioSource);
                 barrier.DisableCellsInPlusPattern(index.Value);
                 DisableBullet();
+                GameStateMachine.Instance.BriefPauseTime = .05f;
                 GameStateMachine.Instance.ChangeTo = States.BRIEF_PAUSE;
             }
         }
