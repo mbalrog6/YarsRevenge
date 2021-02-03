@@ -2,7 +2,8 @@
 
 public class MoveToRightScreenMover : MonoBehaviour, IMover
 {
-    [SerializeField] private float _speed; 
+    [SerializeField] private float _speed;
+    public bool Paused { get; set; }
     private Vector3 _position;
 
     private void Awake()
@@ -12,6 +13,8 @@ public class MoveToRightScreenMover : MonoBehaviour, IMover
 
     private void Update()
     {
+        if (Paused)
+            return; 
         Tick();
     }
 

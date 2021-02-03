@@ -26,7 +26,7 @@ public class Player : MonoBehaviour
     [SerializeField] private SimpleAudioEvent ionCloudAudio;
 
     [SerializeField] private MeshRenderer PlayerQuad;
-    
+
     public event Action OnDie;
 
     public Vector3 DirectionVector =>
@@ -58,6 +58,7 @@ public class Player : MonoBehaviour
     private float _fireBulletCooldownTimer;
     private bool _cannonDeployed;
     private int _ammo;
+    private MoveToRightScreenMover _cannonShotMover;
 
     private float _warlordAmmoTimer;
     private bool _playerDead = false;
@@ -70,10 +71,10 @@ public class Player : MonoBehaviour
     {
         _eatTimer = 0f;
         _startPosition = transform.position;
-        
+
         _mover = new KineticMover(this);
         _rotator = new DirectionalRotator(this);
-        
+
         _canFireBullet = true;
         _fireBulletCooldownTimer = 0f;
 
@@ -85,7 +86,7 @@ public class Player : MonoBehaviour
         _ionCloud = AudioManager.Instance.RequestAudioSource(2);
 
         _ammo = 0;
-        
+
         _playerRectContainer = new RectContainer(this.gameObject, 10, 10, 1f, 1f);
         _playerCollisions = new PlayerCollisions(_playerRectContainer);
         GameManager.Instance.OnBarrierChanged += UpdateBarrier;
@@ -96,9 +97,10 @@ public class Player : MonoBehaviour
         _playerCollisions.AddEntityRect(EntityCast.Cannon, _cannonShot.CannonRectContainer);
         _playerCollisions.AddEntityRect(EntityCast.Warlord, _warlord.WarlordRectContainer);
         _playerCollisions.AddEntityRect(EntityCast.Probe, _probe.ProbeRectContainer);
-        
+
         _bullet.DisableBullet();
         _cannonShot.gameObject.SetActive(false);
+        _cannonShotMover = _cannonShot.GetComponent<MoveToRightScreenMover>();
         _playerInputDTO = InputManager.Instance.PlayerInputDTO;
     }
 
@@ -111,23 +113,26 @@ public class Player : MonoBehaviour
     {
         _canFireBullet = true;
     }
+
     private void Update()
     {
-        if (GameStateMachine.Instance.CurrentState == States.PAUSE  || 
-            GameStateMachine.Instance.CurrentState == States.BRIEF_PAUSE) 
+        if (GameStateMachine.Instance.CurrentState == States.PAUSE ||
+            GameStateMachine.Instance.CurrentState == States.BRIEF_PAUSE)
         {
+            _fireBulletCooldownTimer = Time.time + 0.1f;
+            _cannonShotMover.Paused = true;
             return;
         }
 
         _startPosition = transform.position;
-        
+
         _playerInputDTO = InputManager.Instance.PlayerInputDTO;
-        
+
         _rotator.Tick();
 
         if (PlayerInputDTO.Direction != CardinalDirection.NONE)
         {
-            if(!_buzzSound.isPlaying)
+            if (!_buzzSound.isPlaying)
                 dieSound.Play(_buzzSound);
         }
         else
@@ -138,7 +143,7 @@ public class Player : MonoBehaviour
         BarrierCellIndex = null;
 
         ResolvePlayerTurnInBarrierRect();
-        
+
         if (!BarrierCellIndex.HasValue)
         {
             _mover.Tick();
@@ -168,9 +173,12 @@ public class Player : MonoBehaviour
 
     private void PlayIonSound()
     {
+        if (_ionZone.isActiveAndEnabled == false )
+            return; 
+        
         if (_playerCollisions.CheckIfPlayerHit(_ionZone.IonRectContainer))
         {
-            if( !_ionCloud.isPlaying )
+            if (!_ionCloud.isPlaying)
                 ionCloudAudio.Play(_ionCloud);
         }
         else
@@ -184,11 +192,14 @@ public class Player : MonoBehaviour
         if (_probe.IsDead || _playerDead)
             return;
 
-        if (_probe.ProbeRectContainer.Bounds.Overlaps(_ionZone.IonRectContainer.Bounds))
+        if ( _ionZone.isActiveAndEnabled )
         {
-            return;
+            if (_probe.ProbeRectContainer.Bounds.Overlaps(_ionZone.IonRectContainer.Bounds))
+            {
+                return;
+            }
         }
-        
+
         if (_playerCollisions.CheckPlayerRadiusWithinEntityRadius(EntityCast.Probe, radius, _probe.Radius))
         {
             Die();
@@ -198,28 +209,30 @@ public class Player : MonoBehaviour
     private void ResolvePlayerTurnInBarrierRect()
     {
         if (!_playerCollisions.HasEntityRect(EntityCast.Barrier))
-            return; 
-        
+            return;
+
         if (_playerCollisions.CheckIfPlayerHit(EntityCast.Barrier))
-        { 
+        {
             if (HasChangedFacing())
             {
                 BarrierCellIndex = CheckPlayerContactPointsForBarriorCollision(_backContactPoints, Vector3.zero);
                 if (BarrierCellIndex.HasValue)
                 {
-                    
                     _barrier.SetCellColor(BarrierCellIndex.Value, Color.magenta);
                     var direction = CardinalDirections.GetOppisiteDirection(_playerInputDTO.Direction);
                     if (direction == CardinalDirection.EAST)
                     {
                         direction = CardinalDirection.WEST;
-                    } else if (direction == CardinalDirection.NORTH_EAST)
+                    }
+                    else if (direction == CardinalDirection.NORTH_EAST)
                     {
                         direction = CardinalDirection.NORTH_WEST;
-                    } else if (direction == CardinalDirection.SOUTH_EAST)
+                    }
+                    else if (direction == CardinalDirection.SOUTH_EAST)
                     {
                         direction = CardinalDirection.SOUTH_WEST;
                     }
+
                     var offsetVector = CardinalDirections.GetUnitVectorFromCardinalDirection(direction) * .25f;
                     BarrierCellIndex = CheckPlayerContactPointsForBarriorCollision(_frontContactPoints, offsetVector);
                     if (BarrierCellIndex.HasValue)
@@ -237,8 +250,8 @@ public class Player : MonoBehaviour
     private void DidPlayerHitBarrierCell()
     {
         if (!_playerCollisions.HasEntityRect(EntityCast.Barrier))
-            return; 
-        
+            return;
+
         if (_playerCollisions.CheckIfPlayerHit(EntityCast.Barrier))
         {
             PlayerQuad.material.color = Color.red;
@@ -254,15 +267,18 @@ public class Player : MonoBehaviour
                 {
                     direction = CardinalDirection.WEST;
                     reboundDistance = 0;
-                } else if (direction == CardinalDirection.NORTH_EAST)
+                }
+                else if (direction == CardinalDirection.NORTH_EAST)
                 {
                     direction = CardinalDirection.NORTH;
-                } else if (direction == CardinalDirection.SOUTH_EAST)
+                }
+                else if (direction == CardinalDirection.SOUTH_EAST)
                 {
                     direction = CardinalDirection.SOUTH;
                 }
-                
-                transform.position = _startPosition + CardinalDirections.GetUnitVectorFromCardinalDirection(direction) * reboundDistance;
+
+                transform.position = _startPosition +
+                                     CardinalDirections.GetUnitVectorFromCardinalDirection(direction) * reboundDistance;
                 EatCell(BarrierCellIndex.Value);
                 _playerRectContainer.UpdateToTargetPosition();
             }
@@ -279,15 +295,19 @@ public class Player : MonoBehaviour
                     {
                         direction = CardinalDirection.WEST;
                         reboundDistance = 0;
-                    } else if (direction == CardinalDirection.NORTH_EAST)
+                    }
+                    else if (direction == CardinalDirection.NORTH_EAST)
                     {
                         direction = CardinalDirection.NORTH;
-                    } else if (direction == CardinalDirection.SOUTH_EAST)
+                    }
+                    else if (direction == CardinalDirection.SOUTH_EAST)
                     {
                         direction = CardinalDirection.SOUTH;
                     }
+
                     transform.position = _startPosition +
-                                         CardinalDirections.GetUnitVectorFromCardinalDirection(direction) * reboundDistance;
+                                         CardinalDirections.GetUnitVectorFromCardinalDirection(direction) *
+                                         reboundDistance;
                     _playerRectContainer.UpdateToTargetPosition();
                 }
             }
@@ -301,8 +321,8 @@ public class Player : MonoBehaviour
     private void CheckIfWarlordHitPlayer()
     {
         if (_playerDead == true)
-            return; 
-        
+            return;
+
         if (_playerCollisions.CheckIfPlayerHit(EntityCast.Warlord))
         {
             switch (Warlord.State)
@@ -312,6 +332,7 @@ public class Player : MonoBehaviour
                     {
                         _ammo += _warlord.GetAmmo();
                     }
+
                     break;
                 case WarlordState.ChargeUp:
                     Die();
@@ -327,7 +348,7 @@ public class Player : MonoBehaviour
 
     private void CheckIfCannonHitPlayer()
     {
-        if (_cannonShot.HasFired && _playerCollisions.CheckIfPlayerHit(EntityCast.Cannon))    
+        if (_cannonShot.HasFired && _playerCollisions.CheckIfPlayerHit(EntityCast.Cannon))
         {
             if (_cannonShot.Direction == CardinalDirection.EAST)
             {
@@ -335,14 +356,24 @@ public class Player : MonoBehaviour
             }
             else
             {
-                _ammo += 10; 
+                _ammo += 10;
             }
+
             _cannonShot.Die();
         }
     }
 
     private void FireCannon()
     {
+        if (Time.time <= _fireBulletCooldownTimer)
+        {
+            return;
+        }
+
+        if (_cannonShotMover.Paused == true)
+        {
+            _cannonShotMover.Paused = false;
+        }
         if (_playerInputDTO.FireButton && !_cannonShot.HasFired)
         {
             _cannonShot.Fire();
@@ -396,14 +427,14 @@ public class Player : MonoBehaviour
 
         transform.position = new Vector3(x, y, 0f);
     }
-    
+
     private void FireBulletIfPossible()
     {
-        if (_fireBulletCooldownTimer > Time.time || _ammo <= 0 )
+        if (_fireBulletCooldownTimer > Time.time || _ammo <= 0)
             return;
 
-        if (!_bullet.isActiveAndEnabled && 
-            _playerInputDTO.FireButton == true && 
+        if (!_bullet.isActiveAndEnabled &&
+            _playerInputDTO.FireButton == true &&
             _canFireBullet &&
             _playerInputDTO.LastFacingDirection != CardinalDirection.NONE)
         {
@@ -411,7 +442,7 @@ public class Player : MonoBehaviour
             _canFireBullet = false;
             _fireBulletCooldownTimer = Time.time + bulletFireRate;
             _ammo -= 1;
-            
+
             shotSound.PlayOneShot(_audioSource);
         }
     }
@@ -425,6 +456,7 @@ public class Player : MonoBehaviour
             _ammo += cellAmmoValue;
             GameManager.Instance.AddScore(_barrier.Score(cellIndex));
         }
+
         eatSound.Play(_audioSource);
     }
 
@@ -455,7 +487,7 @@ public class Player : MonoBehaviour
     void Die()
     {
         Debug.Log("Player Died");
-        _playerDead = true; 
+        _playerDead = true;
         _probe.Die();
         GameManager.Instance.KillPlayer();
         OnDie?.Invoke();
@@ -470,11 +502,11 @@ public class Player : MonoBehaviour
         var yOffset = ScreenHelper.Instance.ScreenBounds.yMax - 2f;
         var x = ScreenHelper.Instance.ScreenBounds.xMin + 2f;
         transform.position = new Vector3(x, UnityEngine.Random.Range(-yOffset, yOffset), 0f);
-        _playerDead = false; 
+        _playerDead = false;
         GetComponentInChildren<MeshRenderer>().enabled = true;
     }
 
-    private void UpdateBarrier( Barrier2 barrier)
+    private void UpdateBarrier(Barrier2 barrier)
     {
         _barrier = barrier;
         ChangeBarrierRef(_barrier);
@@ -486,18 +518,19 @@ public class Player : MonoBehaviour
         {
             return true;
         }
+
         return false;
     }
 
     public void Reset()
     {
-        _playerDead = false; 
+        _playerDead = false;
         _ammo = 0;
-         GetComponentInChildren<MeshRenderer>().enabled = false;
-         StartCoroutine(Respawn());
-         _bullet.Reset();
-         _cannonDeployed = false;
-         _cannonShot.Reset();
+        GetComponentInChildren<MeshRenderer>().enabled = false;
+        StartCoroutine(Respawn());
+        _bullet.Reset();
+        _cannonDeployed = false;
+        _cannonShot.Reset();
     }
 
     public void ChangeBarrierRef(Barrier2 barrier)
@@ -519,7 +552,7 @@ public class Player : MonoBehaviour
             new Vector3(_playerRectContainer.Bounds.xMax, _playerRectContainer.Bounds.yMin, 0f));
         Gizmos.DrawLine(new Vector3(_playerRectContainer.Bounds.xMin, _playerRectContainer.Bounds.yMax, 0f),
             new Vector3(_playerRectContainer.Bounds.xMax, _playerRectContainer.Bounds.yMax, 0f));
-        
-        Gizmos.DrawWireSphere( transform.position, radius);
+
+        Gizmos.DrawWireSphere(transform.position, radius);
     }
 }

@@ -75,6 +75,10 @@ public class PlayerInput : IPlayerInput
             input.Paused = false;
         }
 
+        if (input.Paused == true)
+        {
+            input.FireButton = false;
+        }
         _inputDTO = input;
     }
     

@@ -30,6 +30,9 @@ public class PlayerCollisions
 
     public bool CheckIfPlayerHit(RectContainer entity)
     {
+        if (_entityRects == null)
+            return false; 
+        
         return _entityRects[EntityCast.Player].Bounds.Overlaps(entity.Bounds);
     }
     

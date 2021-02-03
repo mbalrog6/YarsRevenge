@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class IonZone : MonoBehaviour
 {
@@ -32,6 +33,18 @@ public class IonZone : MonoBehaviour
             0f);
         transform.position = position; 
         VisualizeIonField();
+    }
+
+    private void OnEnable()
+    {
+        _height = ScreenHelper.Instance.ScreenBounds.height;
+        _width = 3f;
+        _rectContainer = new RectContainer(this.gameObject, 0, 0, _width, _height);
+        Vector3 position = new Vector3(
+            ScreenHelper.Instance.ScreenBounds.xMin + (ScreenHelper.Instance.ScreenBounds.width / 3),
+            ScreenHelper.Instance.ScreenBounds.center.y,
+            0f);
+        transform.position = position; 
     }
 
     private void Update()
