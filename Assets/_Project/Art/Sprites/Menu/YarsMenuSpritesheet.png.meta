@@ -1,0 +1,598 @@
+fileFormatVersion: 2
+guid: 2a07cd283b0519649b4e78c0c9dbe03a
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5500765153747439416
+    second: Wing Left
+  - first:
+      213: -4206066338952624459
+    second: Head
+  - first:
+      213: 6802381934226278780
+    second: Antenna Right Base
+  - first:
+      213: 7920409068043917927
+    second: Antenna Left Base
+  - first:
+      213: -4929134417896895895
+    second: Wing Right
+  - first:
+      213: 128990142049501970
+    second: Body
+  - first:
+      213: 1111889495207366056
+    second: Front Arm Left
+  - first:
+      213: 5303272807863140470
+    second: Hind Leg Left Upper
+  - first:
+      213: -6172522281156125764
+    second: Hind Leg Right
+  - first:
+      213: 5780389340240994017
+    second: Middle Arm Right
+  - first:
+      213: 2303378441743448652
+    second: Front Arm Right Lower
+  - first:
+      213: -7394125389797802639
+    second: Middle Arm Left Lower
+  - first:
+      213: 8048205289448850801
+    second: Middle Arm Left
+  - first:
+      213: 3017213944555608595
+    second: Antenna Right Upper
+  - first:
+      213: 920572722484617676
+    second: Front Arm Left Lower
+  - first:
+      213: -926691427625602177
+    second: Hind Leg Right Upper
+  - first:
+      213: 3150550926223595524
+    second: Antenna Left Upper
+  - first:
+      213: -5509580166633160413
+    second: Hind Leg Left
+  - first:
+      213: 7307944751641632319
+    second: Front Arm Right
+  - first:
+      213: -2343508157516134406
+    second: Middle Arm Right Lower
+  externalObjects: {}
+  serializedVersion: 11
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: -1
+    mipBias: -100
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 64
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: WebGL
+    maxTextureSize: 1024
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Wing Left
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 340
+        width: 248
+        height: 171
+      alignment: 9
+      pivot: {x: 0.98161316, y: 0.06313248}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8c0790aac3b59a3b0800000000000000
+      internalID: -5500765153747439416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Head
+      rect:
+        serializedVersion: 2
+        x: 390
+        y: 406
+        width: 101
+        height: 104
+      alignment: 9
+      pivot: {x: 0.4999997, y: 0.8712097}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5b6400d03fc01a5c0800000000000000
+      internalID: -4206066338952624459
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Antenna Right Base
+      rect:
+        serializedVersion: 2
+        x: 386
+        y: 369
+        width: 124
+        height: 30
+      alignment: 9
+      pivot: {x: 0.041154183, y: 0.16701558}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c798710245ae66e50800000000000000
+      internalID: 6802381934226278780
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Antenna Left Base
+      rect:
+        serializedVersion: 2
+        x: 399
+        y: 338
+        width: 111
+        height: 29
+      alignment: 9
+      pivot: {x: 0.9617172, y: 0.15553336}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 76a5a805512faed60800000000000000
+      internalID: 7920409068043917927
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wing Right
+      rect:
+        serializedVersion: 2
+        x: 95
+        y: 167
+        width: 248
+        height: 171
+      alignment: 9
+      pivot: {x: 0.028894763, y: 0.050432798}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 96a8a13dc52389bb0800000000000000
+      internalID: -4929134417896895895
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Body
+      rect:
+        serializedVersion: 2
+        x: 364
+        y: 199
+        width: 147
+        height: 136
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 213436cc9d34ac100800000000000000
+      internalID: 128990142049501970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Front Arm Left
+      rect:
+        serializedVersion: 2
+        x: 164
+        y: 105
+        width: 55
+        height: 61
+      alignment: 9
+      pivot: {x: 0.88694626, y: 0.8987272}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8adc257da993e6f00800000000000000
+      internalID: 1111889495207366056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hind Leg Left Upper
+      rect:
+        serializedVersion: 2
+        x: 299
+        y: 81
+        width: 58
+        height: 81
+      alignment: 9
+      pivot: {x: 0.0790842, y: 0.058669195}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 670cba35582099940800000000000000
+      internalID: 5303272807863140470
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hind Leg Right
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 150
+        width: 40
+        height: 48
+      alignment: 9
+      pivot: {x: 0.12687989, y: 0.22361438}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cbb518f40bbc65aa0800000000000000
+      internalID: -6172522281156125764
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Middle Arm Right
+      rect:
+        serializedVersion: 2
+        x: 403
+        y: 160
+        width: 108
+        height: 36
+      alignment: 9
+      pivot: {x: 0.09053972, y: 0.4539354}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1eed488aa71183050800000000000000
+      internalID: 5780389340240994017
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Front Arm Right Lower
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 16
+        width: 74
+        height: 126
+      alignment: 9
+      pivot: {x: 0.8585601, y: 0.9374616}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c4a396b2d7e37ff10800000000000000
+      internalID: 2303378441743448652
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Middle Arm Left Lower
+      rect:
+        serializedVersion: 2
+        x: 363
+        y: 13
+        width: 53
+        height: 132
+      alignment: 9
+      pivot: {x: 0.20275533, y: 0.93342245}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 17db76c322ac26990800000000000000
+      internalID: -7394125389797802639
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Middle Arm Left
+      rect:
+        serializedVersion: 2
+        x: 419
+        y: 123
+        width: 92
+        height: 36
+      alignment: 9
+      pivot: {x: 0.92659396, y: 0.28503376}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 175c40dc118f0bf60800000000000000
+      internalID: 8048205289448850801
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Antenna Right Upper
+      rect:
+        serializedVersion: 2
+        x: 29
+        y: 34
+        width: 28
+        height: 60
+      alignment: 9
+      pivot: {x: 0.08468056, y: 0.04710407}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 31a9790c81c4fd920800000000000000
+      internalID: 3017213944555608595
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Front Arm Left Lower
+      rect:
+        serializedVersion: 2
+        x: 91
+        y: 14
+        width: 69
+        height: 100
+      alignment: 9
+      pivot: {x: 0.17122318, y: 0.9403618}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cc12c91830886cc00800000000000000
+      internalID: 920572722484617676
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hind Leg Right Upper
+      rect:
+        serializedVersion: 2
+        x: 161
+        y: 8
+        width: 31
+        height: 95
+      alignment: 9
+      pivot: {x: 0.7802109, y: 0.06110067}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f73f9ff6e0bb323f0800000000000000
+      internalID: -926691427625602177
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Antenna Left Upper
+      rect:
+        serializedVersion: 2
+        x: 301
+        y: 14
+        width: 28
+        height: 60
+      alignment: 9
+      pivot: {x: 0.9343196, y: 0.048570506}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 408d554006109bb20800000000000000
+      internalID: 3150550926223595524
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Hind Leg Left
+      rect:
+        serializedVersion: 2
+        x: 334
+        y: 14
+        width: 25
+        height: 66
+      alignment: 9
+      pivot: {x: 0.4829895, y: 0.106963016}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3210b4a870a0a83b0800000000000000
+      internalID: -5509580166633160413
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Front Arm Right
+      rect:
+        serializedVersion: 2
+        x: 420
+        y: 12
+        width: 29
+        height: 82
+      alignment: 9
+      pivot: {x: 0.23314482, y: 0.9516537}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3e97cf48090b6560800000000000000
+      internalID: 7307944751641632319
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Middle Arm Right Lower
+      rect:
+        serializedVersion: 2
+        x: 452
+        y: 11
+        width: 59
+        height: 108
+      alignment: 9
+      pivot: {x: 0.82791394, y: 0.9069005}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af745074fbf2a7fd0800000000000000
+      internalID: -2343508157516134406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+  spritePackingTag: 
+  pSDRemoveMatte: 0
+  pSDShowRemoveMatteOption: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

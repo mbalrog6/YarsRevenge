@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using YarsRevenge._Project.Audio;
+using YarsRevenge._Project.Scripts.Audio.Audio_Scripts;
 
 public class CannonShot : MonoBehaviour
 {
@@ -9,9 +11,10 @@ public class CannonShot : MonoBehaviour
     [SerializeField] private Warlord qotile;
     [SerializeField] private Transform[] contactPoints;
 
-    [Header("Audio")] [SerializeField] private SimpleAudioEvent explosion;
-    [SerializeField] private SimpleAudioEvent cannonFire;
-    [SerializeField] private SimpleAudioEvent rebound;
+    [Header("Audio")]
+    [SerializeField] private PlaySound explosion;
+    [SerializeField] private PlaySound cannonFire;
+    [SerializeField] private PlaySound rebound;
     private AudioSource _audioSource;
 
     private RectContainer _collisionRect;
@@ -25,6 +28,7 @@ public class CannonShot : MonoBehaviour
     public RectContainer CannonRectContainer => _collisionRect;
 
     public event Action OnDie;
+    public event Action OnExplode;
 
     private void Awake()
     {
@@ -35,6 +39,21 @@ public class CannonShot : MonoBehaviour
         Direction = CardinalDirection.EAST;
         _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
         GameManager.Instance.OnBarrierChanged += UpdateBarrier;
+
+        if (cannonFire == null)
+        {
+            cannonFire = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
+        }
+
+        if (rebound == null)
+        {
+            rebound = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
+        }
+
+        if (explosion == null)
+        {
+            explosion = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
+        }
     }
 
     private void Update()
@@ -101,7 +120,7 @@ public class CannonShot : MonoBehaviour
                 foreach (var index in _cellIndexs)
                 {
                     GameManager.Instance.AddScore(barrier.Score(index));
-                    barrier.DisableCell(index);
+                    barrier.DisableCellsIn3x3Pattern(index);
                 }
 
                 if (barrier.BarrierComponent.BarrierInfo.IsReflective)
@@ -113,6 +132,7 @@ public class CannonShot : MonoBehaviour
                 else
                 {
                     Explode();
+                    Die();
                 }
             }
         }
@@ -153,8 +173,8 @@ public class CannonShot : MonoBehaviour
 
     public void Die()
     {
-        Reset();
         OnDie?.Invoke();
+        Reset();
     }
 
     public void Reset()
@@ -179,6 +199,7 @@ public class CannonShot : MonoBehaviour
         GameStateMachine.Instance.BriefPauseTime = .3f;
         GameStateMachine.Instance.ChangeTo = States.BRIEF_PAUSE;
         explosion.PlayOneShot(_audioSource);
+        OnExplode?.Invoke();
         Die();
     }
 

@@ -12,6 +12,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private IonZone _ionZone;
     [Space(10)] [SerializeField] private GameObject _barrierCell;
     [SerializeField] private LevelInfo[] levelData;
+
+    [SerializeField] private float barrierStartXOffset;
     public static GameManager Instance => _instance;
     private static GameManager _instance;
 
@@ -59,11 +61,12 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         AdvanceToNextLevel();
+        CameraShake.OnStartShake += ScreenHelper.FreezeBounds;
+        CameraShake.OnEndShake += ScreenHelper.Thaw;
     }
 
     private void Update()
     {
-        //DebugText.Instance.SetText($"Lives = [{Lives}] Score = {Score}");
         if (Input.GetKeyDown(KeyCode.L))
         {
             AdvanceToNextLevel();
@@ -81,56 +84,6 @@ public class GameManager : MonoBehaviour
             _pausedTime = 0;
         }
         
-
-        if (TutorialActive && GameStateMachine.Instance.CurrentState == States.PLAY)
-        {
-            if (_tutorialIndex == 0 && DialogueManager.Instance.IsVisible == false )
-            {
-                Mediator.Instance.Publish<ShowDialogueCommand>(new ShowDialogueCommand());
-                DialogueManager.Instance.ShowNextStoryElement();
-                _tutorialIndex = 1;
-            }
-
-            if (_tutorialIndex == 1 && DialogueManager.Instance.IsVisible == false )
-            {
-                if (_tutorialTimerSet == false)
-                {
-                    _tutorialTimer = Time.time + 5f;
-                    _tutorialTimerSet = true;
-                }
-                else if (Time.time > _tutorialTimer)
-                {
-                    if (_player.Ammo <= 0)
-                    {
-                        Mediator.Instance.Publish<ShowDialogueCommand>(new ShowDialogueCommand());
-                        DialogueManager.Instance.ShowNextStoryElement();
-                        
-                    }
-                    _tutorialIndex = 2;
-                    _tutorialTimerSet = false;
-                }
-            }
-
-            if (_tutorialIndex == 2 && DialogueManager.Instance.IsVisible == false )
-            {
-                if (_player.Ammo >= 1)
-                {
-                    Mediator.Instance.Publish<ShowDialogueCommand>(new ShowDialogueCommand());
-                    DialogueManager.Instance.ShowNextStoryElement();
-                    _tutorialIndex = 3;
-                }
-            }
-
-            if (_tutorialIndex == 3 && DialogueManager.Instance.IsVisible == false )
-            {
-                if( _player.Ammo > 15 )
-                {
-                    Mediator.Instance.Publish<ShowDialogueCommand>(new ShowDialogueCommand());
-                    DialogueManager.Instance.ShowNextStoryElement();
-                    _tutorialIndex = 4;
-                }
-            }
-        }
     }
 
     private void InitializeStartValues()
@@ -161,7 +114,7 @@ public class GameManager : MonoBehaviour
         _barrier.SetHighAndLowBoundsLimitForOscalator(bottom, top);
 
         Vector3 position = ScreenHelper.Instance.ScreenBounds.center;
-        position.x = ScreenHelper.Instance.ScreenBounds.xMax - 3f;
+        position.x = ScreenHelper.Instance.ScreenBounds.xMax - barrierStartXOffset;
         position.y -= _barrier.BarrierRectContainer.Bounds.height / 2f;
         position.z = 0f;
         _barrier.transform.position = position;

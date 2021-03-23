@@ -129,7 +129,63 @@ public class Barrier2 : MonoBehaviour
         _mover.LowLimit = low;
         _mover.HighLimit = high;
     }
-    
+
+    public void DisableCellsIn3x3Pattern(int index)
+    {
+        var totalCells = BarrierComponent.Barrier.Length;
+        var right = index + 1;
+        var left = index - 1;
+
+        if (index != 0)
+        {
+            if (index % (BarrierComponent.Width) == 0)
+            {
+                left = -1;
+            }
+
+            if (index % (BarrierComponent.Width) == BarrierComponent.Width - 1)
+            {
+                right = -1;
+            }
+        }
+        
+        for (int i = -1; i < 2; i++)
+        {
+            int workingIndex = index + (BarrierComponent.Width * i);
+            if (workingIndex < totalCells && workingIndex >= 0)
+            {
+                    DisableCell(workingIndex);
+            }
+        }
+
+        if (right >= 0 && right < totalCells)
+        {
+            int rightIndex = right;
+            for (int i = -1; i < 2; i++)
+            {
+                rightIndex = right + (BarrierComponent.Width * i);
+                if (rightIndex < totalCells && rightIndex >= 0)
+                {
+                    DisableCell(rightIndex);
+                }
+            }
+        }
+
+        if (left >= 0 && left < totalCells)
+        {
+            int leftIndex = left;
+            for (int i = -1; i < 2; i++)
+            {
+                leftIndex = left + (BarrierComponent.Width * i);
+                if (leftIndex < totalCells && leftIndex >= 0)
+                {
+                    DisableCell(leftIndex);
+                }
+            }
+        }
+        
+    }
+
     public void DisableCellsInPlusPattern(int index)
     {
         var totalCells = BarrierComponent.Barrier.Length;

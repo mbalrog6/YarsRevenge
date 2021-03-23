@@ -1,7 +1,8 @@
 {
     "name": "TextMeshPro",
     "references": [
-        "GUID:cad576a3e03e7944aaa00f03e7292cc0"
+        "GUID:cad576a3e03e7944aaa00f03e7292cc0",
+        "GUID:c92a99f2abaa5a54d900477df09a51e7"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -124,20 +124,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!114 &7
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1751192221}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 040ab337380e42e4ca22884b5974abf9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  StartOnScreen: 1
-  _hasFocus: 0
 --- !u!224 &421291829 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7715836091825256802, guid: 0b4afb5367f84c648a1817ae78590d94,
@@ -205,7 +191,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &684221083
 RectTransform:
   m_ObjectHideFlags: 0
@@ -295,7 +281,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1536682035
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -523,7 +509,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1751192222}
   - component: {fileID: 1751192224}
-  - component: {fileID: 7}
   - component: {fileID: 1751192223}
   m_Layer: 5
   m_Name: Dialogue
@@ -550,8 +535,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -23, y: -128}
-  m_SizeDelta: {x: 531.0293, y: 200.38873}
+  m_AnchoredPosition: {x: -23, y: -5}
+  m_SizeDelta: {x: 531.0293, y: 108.7}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1751192223
 MonoBehaviour:
@@ -560,7 +545,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1751192221}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -602,13 +587,14 @@ GameObject:
   - component: {fileID: 1984108635}
   - component: {fileID: 1984108634}
   - component: {fileID: 1984108633}
+  - component: {fileID: 1984108636}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!81 &1984108633
 AudioListener:
   m_ObjectHideFlags: 0
@@ -674,6 +660,37 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1984108636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1984108632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 1
+  m_Cameras: []
+  m_RendererIndex: 0
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_RenderPostProcessing: 1
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_Version: 2
 --- !u!1 &2042450066
 GameObject:
   m_ObjectHideFlags: 0
@@ -734,8 +751,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: This is a Test Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 7d8ecdf4ba57f4143944f1703488b74d, type: 2}
-  m_sharedMaterial: {fileID: -7801576401282320729, guid: 7d8ecdf4ba57f4143944f1703488b74d,
+  m_fontAsset: {fileID: 11400000, guid: 0c70e51bc0a875d4b91ff4dca1349720, type: 2}
+  m_sharedMaterial: {fileID: -6851230114374484459, guid: 0c70e51bc0a875d4b91ff4dca1349720,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -744,13 +761,13 @@ MonoBehaviour:
     serializedVersion: 2
     rgba: 4294967295
   m_fontColor: {r: 1, g: 1, b: 1, a: 1}
-  m_enableVertexGradient: 0
-  m_colorMode: 3
+  m_enableVertexGradient: 1
+  m_colorMode: 2
   m_fontColorGradient:
-    topLeft: {r: 1, g: 1, b: 1, a: 1}
-    topRight: {r: 1, g: 1, b: 1, a: 1}
-    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
-    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+    topLeft: {r: 1, g: 0.7310908, b: 0.21226418, a: 1}
+    topRight: {r: 1, g: 0.7310908, b: 0.21226418, a: 1}
+    bottomLeft: {r: 1, g: 0.97433084, b: 0.8160377, a: 1}
+    bottomRight: {r: 1, g: 0.97433084, b: 0.8160377, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
@@ -760,10 +777,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 65.65
-  m_fontSizeBase: 32.68
+  m_fontSize: 26
+  m_fontSizeBase: 26
   m_fontWeight: 400
-  m_enableAutoSizing: 1
+  m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
@@ -796,7 +813,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 1
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 22.326996, y: 26.386475, z: 24.356812, w: 0}
+  m_margin: {x: 22.326996, y: 26.386475, z: 24.356812, w: 20}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -990,7 +1007,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dialoguePannel: {fileID: 1751192221}
-  _menuManager: {fileID: 7}
 --- !u!114 &2120013475
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1009,7 +1025,7 @@ MonoBehaviour:
   - {fileID: 4900000, guid: 7f0a25fdd10bf93459502632f3df3508, type: 3}
   - {fileID: 4900000, guid: a0d8f0d99ad276b44b1e62ba39f67488, type: 3}
   - {fileID: 4900000, guid: b50bb6e67f84e8e4a90f4113f5a79e90, type: 3}
-  typingSound: {fileID: 11400000, guid: 5de4a8edd725f6f458048ce21ee3e738, type: 2}
+  typingSound: {fileID: 0}
 --- !u!1001 &7715836091709627991
 PrefabInstance:
   m_ObjectHideFlags: 0

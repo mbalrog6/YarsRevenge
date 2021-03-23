@@ -1,10 +1,8 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using System.Xml;
 using Ink.Runtime;
 using TMPro;
 using UnityEngine;
-
+using YarsRevenge._Project.Audio;
 
 public class DialogueManager : MonoBehaviour
 {
@@ -12,7 +10,7 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private TextAsset[] _inkJSONs;
     
     [Header("Audio")]
-    [SerializeField] private SimpleAudioEvent typingSound;
+    [SerializeField] private PlaySound typingSound;
     private AudioSource _audioSource;
     public bool IsVisible { get; private set; }
 
@@ -24,6 +22,7 @@ public class DialogueManager : MonoBehaviour
     private Coroutine _teletypeCoroutine;
     private Story _story;
     private int _storyIndex;
+    private bool isTyping = false;
 
     private void Awake()
     {
@@ -34,10 +33,17 @@ public class DialogueManager : MonoBehaviour
 
             IsVisible = false;
             _dialogueText = dialoguePanel.GetComponentInChildren<TextMeshProUGUI>();
-            _continueButton = dialoguePanel.GetComponentsInChildren<TextMeshProUGUI>()[1];
             _story = new Story(_inkJSONs[_storyIndex].text);
             dialoguePanel.SetActive(false);
             _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
+
+            #region Audio Mocking...
+
+            if (typingSound == null)
+            {
+                typingSound = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
+            }
+            #endregion
         }
         else
         {
@@ -92,7 +98,6 @@ public class DialogueManager : MonoBehaviour
                         _story = new Story(_inkJSONs[_storyIndex].text);
                     }
                 }
-                Debug.Log("Hiding the Dialogue");
             }
         }
         else
@@ -100,7 +105,6 @@ public class DialogueManager : MonoBehaviour
             _teletypeCoroutine = StartCoroutine(TeleType(_dialogueText, 0.03f));
         }
         
-        _continueButton.text = GetOption();
     }
 
     public string LoadStoryChunk()
@@ -131,13 +135,13 @@ public class DialogueManager : MonoBehaviour
 
     private IEnumerator TeleType(TextMeshProUGUI text, float typeSpeed)
     {
-        bool stillTyping = true;
+        isTyping = true;
         _dialogueText.ForceMeshUpdate();
         int totalVisibleCharacters = text.textInfo.characterCount;
         int counter = 0;
         
 
-        while (stillTyping)
+        while (isTyping)
         {
             int visibleCount = counter % (totalVisibleCharacters + 1);
 
@@ -145,16 +149,20 @@ public class DialogueManager : MonoBehaviour
 
             if (visibleCount >= totalVisibleCharacters)
             {
-                stillTyping = false;
+                isTyping = false;
                 _teletypeCoroutine = null;
-                Debug.Log("Finished Typing");
+                StartCoroutine(DelayThenAdvance(1f));
             }
 
             counter += 1;
-            if( counter % 2 == 0)
-                typingSound.PlayOneShot(_audioSource);
+            if (counter % 2 == 0)
+            {
+                if (typingSound != null)
+                {
+                    typingSound.PlayOneShot(_audioSource);
+                }
+            }
             yield return new WaitForSeconds(typeSpeed);
-            Debug.Log("Waiting for .05 seconds");
         }
     }
 
@@ -162,5 +170,11 @@ public class DialogueManager : MonoBehaviour
     {
         yield return new WaitForSeconds(time);
         IsVisible = false;
+    }
+
+    private IEnumerator DelayThenAdvance(float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+        Mediator.Instance.Publish(new NextDialogueChunk());
     }
 }

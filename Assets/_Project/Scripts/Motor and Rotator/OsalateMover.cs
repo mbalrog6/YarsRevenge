@@ -47,6 +47,7 @@ public class OsalateMover : IMover
     {
         _computedPosition = _entityTransform.position;
         float delta = Time.deltaTime * Speed;
+        
         if (OscalatingInY)
         {
             _computedPosition.y += (MovingTowardHighBound ? delta : -delta);
@@ -73,7 +74,7 @@ public class OsalateMover : IMover
                 MovingTowardHighBound = false; 
             }
         }
-
+        
         _entityTransform.position = _computedPosition;
     }
     

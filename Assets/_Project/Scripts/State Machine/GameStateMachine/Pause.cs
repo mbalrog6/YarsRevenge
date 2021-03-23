@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using YarsRevenge._Project.Audio;
 
 public class Pause : IState
 {

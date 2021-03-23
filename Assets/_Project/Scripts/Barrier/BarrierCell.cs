@@ -6,6 +6,6 @@ public class BarrierCell : MonoBehaviour
     [SerializeField] private Dimensions cellDimensions;
 
     public int Score { get; private set; } = 5; 
-    public int Width => cellDimensions.x;
-    public int Height => cellDimensions.y;
+    public float Width => cellDimensions.x / 4f;
+    public float Height => cellDimensions.y / 4f;
 }

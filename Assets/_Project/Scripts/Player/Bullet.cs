@@ -1,5 +1,7 @@
 ﻿using System;
 using UnityEngine;
+using YarsRevenge._Project.Audio;
+
 
 public class Bullet : MonoBehaviour
 {
@@ -7,11 +9,13 @@ public class Bullet : MonoBehaviour
     [SerializeField] private Transform spawnPoint;
     [SerializeField] private Player player;
     [SerializeField] private float radius = .2f;
+    [SerializeField] private ParticleSystem bulletFX;
+    [SerializeField] private ParticleSystem bulletExplosionFX;
 
     private Barrier2 barrier;
     
     [Header("Audio")]
-    [SerializeField] private SimpleAudioEvent _splatterSound;
+    [SerializeField] private PlaySound splatterSound;
     private AudioSource _audioSource;
     private Vector3 _fireDirection;
 
@@ -22,6 +26,23 @@ public class Bullet : MonoBehaviour
     private void Awake()
     {
         _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
+
+        if (bulletFX == null)
+        {
+            bulletFX = GetComponent<ParticleSystem>();
+        }
+        
+        if (bulletExplosionFX == null)
+        {
+            bulletFX = GetComponent<ParticleSystem>();
+        }
+
+        #region Audio Mixing...
+        if (splatterSound == null)
+        {
+            splatterSound = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
+        }
+        #endregion
     }
 
     private void Start()
@@ -33,12 +54,14 @@ public class Bullet : MonoBehaviour
     {
         HasBeenFired = false;
         gameObject.SetActive(false);
+        bulletFX.Stop();
         OnDisabled?.Invoke();
     }
 
     public void FireBullet()
     {
         gameObject.SetActive(true);
+        bulletFX.Play();
         HasBeenFired = true;
         _fireDirection = CardinalDirections.GetUnitVectorFromCardinalDirection(player.PlayerInputDTO.LastFacingDirection);
         transform.position = spawnPoint.position;
@@ -69,19 +92,39 @@ public class Bullet : MonoBehaviour
 
     private void CheckForCollisionWithBarrior()
     {
+        
         var collision = barrier.BarrierRectContainer.Bounds.Contains(transform.position);
         if (collision)
         {
-            var index = barrier.GetCellFromVector3(transform.position);
+            var index = CheckForToleranceHitAboveAndBelowPoint(transform.position, 0.2f);
+            //var index = barrier.GetCellFromVector3(transform.position);
             if (index.HasValue)
             {
-                _splatterSound.PlayOneShot(_audioSource);
+                splatterSound.PlayOneShot(_audioSource);
                 barrier.DisableCellsInPlusPattern(index.Value);
+                bulletExplosionFX.transform.position = transform.position;
+                bulletExplosionFX.Play();
                 DisableBullet();
                 GameStateMachine.Instance.BriefPauseTime = .05f;
                 GameStateMachine.Instance.ChangeTo = States.BRIEF_PAUSE;
+                CameraShake.CustomShake(.3f, .3f, 1);
             }
         }
+    }
+
+    private int? CheckForToleranceHitAboveAndBelowPoint(Vector3 point, float tolerance )
+    {
+        var index = barrier.GetCellFromVector3(point);
+        if (index.HasValue == false)
+        {
+            index = barrier.GetCellFromVector3(new Vector3( point.x, point.y + tolerance, point.z));
+        }
+        if (index.HasValue == false)
+        {
+            index = barrier.GetCellFromVector3(new Vector3( point.x, point.y + tolerance, point.z));
+        }
+
+        return index; 
     }
 
     private void Move()

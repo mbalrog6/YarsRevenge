@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using UnityEngine;
+using YarsRevenge._Project.Audio;
+using YarsRevenge._Project.Scripts.Audio.Audio_Scripts;
 
 public class Player : MonoBehaviour
 {
@@ -20,14 +22,20 @@ public class Player : MonoBehaviour
     [SerializeField] private int cellAmmoValue = 2;
     [SerializeField] private float radius;
 
-    [Header("Audio")] [SerializeField] private SimpleAudioEvent shotSound;
-    [SerializeField] private SimpleAudioEvent eatSound;
-    [SerializeField] private SimpleAudioEvent dieSound;
-    [SerializeField] private SimpleAudioEvent ionCloudAudio;
+    [SerializeField] private ParticleSystem chewDust;
 
-    [SerializeField] private MeshRenderer PlayerQuad;
+    [SerializeField] private Animator playerAnimator;
+    private int _chewString = Animator.StringToHash("Chew");
+    private int _shootString = Animator.StringToHash("Shoot"); 
 
+    [Header("Audio")] 
+    [SerializeField] private PlaySound shotSound;
+    [SerializeField] private PlaySound eatSound;
+    [SerializeField] private PlaySound dieSound;
+    [SerializeField] private PlaySound ionCloudAudio;
+    [SerializeField] private float _leftScreenEdgePadding;
     public event Action OnDie;
+
 
     public Vector3 DirectionVector =>
         CardinalDirections.GetUnitVectorFromCardinalDirection(PlayerInputDTO.Direction);
@@ -58,6 +66,7 @@ public class Player : MonoBehaviour
     private float _fireBulletCooldownTimer;
     private bool _cannonDeployed;
     private int _ammo;
+    private int _zarlonAmmo;
     private MoveToRightScreenMover _cannonShotMover;
 
     private float _warlordAmmoTimer;
@@ -65,10 +74,15 @@ public class Player : MonoBehaviour
     private AudioSource _audioSource;
     private AudioSource _buzzSound;
     private AudioSource _ionCloud;
+    private AmmoUpdateCommand _ammoUpdateCommand;
+    private UpdateZarlonCannonCommand _zarlonUpdateCommand;
+    private int zarlonAmmoRequirement = 10;
 
 
     private void Awake()
     {
+        _ammoUpdateCommand = new AmmoUpdateCommand(0);
+        _zarlonUpdateCommand = new UpdateZarlonCannonCommand();
         _eatTimer = 0f;
         _startPosition = transform.position;
 
@@ -86,10 +100,34 @@ public class Player : MonoBehaviour
         _ionCloud = AudioManager.Instance.RequestAudioSource(2);
 
         _ammo = 0;
+        _zarlonAmmo = 0;
 
-        _playerRectContainer = new RectContainer(this.gameObject, 10, 10, 1f, 1f);
+        _playerRectContainer = new RectContainer(this.gameObject, 10, 10, 0.6f, 0.8f);
         _playerCollisions = new PlayerCollisions(_playerRectContainer);
         GameManager.Instance.OnBarrierChanged += UpdateBarrier;
+        
+        #region Audio Mocking...
+
+        if (shotSound ==  null)
+        {
+            shotSound = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
+        }
+
+        if (eatSound ==  null)
+        {
+            eatSound = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
+        }
+
+        if (dieSound ==  null)
+        {
+            dieSound = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
+        }
+
+        if (ionCloudAudio ==  null)
+        {
+            ionCloudAudio = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
+        }
+        #endregion
     }
 
     private void Start()
@@ -102,11 +140,19 @@ public class Player : MonoBehaviour
         _cannonShot.gameObject.SetActive(false);
         _cannonShotMover = _cannonShot.GetComponent<MoveToRightScreenMover>();
         _playerInputDTO = InputManager.Instance.PlayerInputDTO;
+
+        SetAmmo(0);
     }
 
     private void Handle_CannonShotOnDie()
     {
-        _cannonDeployed = false;
+        StartCoroutine(ResetCannonDeployVariable());
+    }
+
+    private IEnumerator ResetCannonDeployVariable()
+    {
+        yield return new WaitForSeconds(1f);
+        _cannonDeployed = false; 
     }
 
     private void Handle_BulletDisabled()
@@ -254,7 +300,6 @@ public class Player : MonoBehaviour
 
         if (_playerCollisions.CheckIfPlayerHit(EntityCast.Barrier))
         {
-            PlayerQuad.material.color = Color.red;
             var offsetVector =
                 CardinalDirections.GetUnitVectorFromCardinalDirection(
                     CardinalDirections.GetOppisiteDirection(_playerInputDTO.Direction)) * .2f;
@@ -312,10 +357,6 @@ public class Player : MonoBehaviour
                 }
             }
         }
-        else
-        {
-            PlayerQuad.material.color = Color.white;
-        }
     }
 
     private void CheckIfWarlordHitPlayer()
@@ -330,7 +371,7 @@ public class Player : MonoBehaviour
                 case WarlordState.Idle:
                     if (_warlord.CanGetAmmo)
                     {
-                        _ammo += _warlord.GetAmmo();
+                        SetAmmo(_ammo + _warlord.GetAmmo());
                     }
 
                     break;
@@ -356,7 +397,7 @@ public class Player : MonoBehaviour
             }
             else
             {
-                _ammo += 10;
+                SetAmmo(_ammo + 10);
             }
 
             _cannonShot.Die();
@@ -368,6 +409,14 @@ public class Player : MonoBehaviour
         if (Time.time <= _fireBulletCooldownTimer)
         {
             return;
+        }
+        
+        if ( _ionZone.isActiveAndEnabled )
+        {
+            if (_playerRectContainer.Bounds.Overlaps(_ionZone.IonRectContainer.Bounds))
+            {
+                return;
+            }
         }
 
         if (_cannonShotMover.Paused == true)
@@ -382,13 +431,14 @@ public class Player : MonoBehaviour
 
     private void DeployCannonIFPossible()
     {
-        if (!_cannonDeployed && transform.position.x <= ScreenHelper.Instance.ScreenBounds.xMin && _ammo >= 10)
+        if (!_cannonDeployed && transform.position.x <= ScreenHelper.Instance.ScreenBounds.xMin + _leftScreenEdgePadding && _ammo >= zarlonAmmoRequirement)
         {
             _cannonDeployed = true;
-            _ammo -= 10;
+            SetAmmo(_ammo - 10);
             _cannonShot.gameObject.SetActive(true);
             _cannonShot.transform.position =
                 new Vector3(ScreenHelper.Instance.ScreenBounds.xMin + .5f, transform.position.y, 0f);
+            Debug.Log($"Cannon Deployed, Player Transform X = {transform.position.x}, Screen xMin = {ScreenHelper.Instance.ScreenBounds.xMin}");
         }
     }
 
@@ -420,9 +470,9 @@ public class Player : MonoBehaviour
             x = ScreenHelper.Instance.ScreenBounds.xMax;
         }
 
-        if (x < ScreenHelper.Instance.ScreenBounds.xMin)
+        if (x < ScreenHelper.Instance.ScreenBounds.xMin + _leftScreenEdgePadding)
         {
-            x = ScreenHelper.Instance.ScreenBounds.xMin;
+            x = ScreenHelper.Instance.ScreenBounds.xMin + _leftScreenEdgePadding;
         }
 
         transform.position = new Vector3(x, y, 0f);
@@ -432,16 +482,25 @@ public class Player : MonoBehaviour
     {
         if (_fireBulletCooldownTimer > Time.time || _ammo <= 0)
             return;
+        
+        if ( _ionZone.isActiveAndEnabled )
+        {
+            if (_playerRectContainer.Bounds.Overlaps(_ionZone.IonRectContainer.Bounds))
+            {
+                return;
+            }
+        }
 
         if (!_bullet.isActiveAndEnabled &&
             _playerInputDTO.FireButton == true &&
             _canFireBullet &&
             _playerInputDTO.LastFacingDirection != CardinalDirection.NONE)
         {
+            playerAnimator.SetTrigger(_shootString);
             _bullet.FireBullet();
             _canFireBullet = false;
             _fireBulletCooldownTimer = Time.time + bulletFireRate;
-            _ammo -= 1;
+            SetAmmo(_ammo - 1);
 
             shotSound.PlayOneShot(_audioSource);
         }
@@ -449,14 +508,20 @@ public class Player : MonoBehaviour
 
     private void EatCell(int cellIndex)
     {
-        if (Time.time >= _eatTimer)
+        if (Time.time >= _eatTimer)     
         {
             _barrier.DisableCell(cellIndex);
             _eatTimer = Time.time + eatCooldownTime;
-            _ammo += cellAmmoValue;
+            SetAmmo(_ammo + cellAmmoValue);
             GameManager.Instance.AddScore(_barrier.Score(cellIndex));
         }
 
+        playerAnimator.ResetTrigger(_chewString);
+        playerAnimator.SetTrigger(_chewString);
+
+        if(chewDust.isStopped)
+            chewDust.Play();
+        
         eatSound.Play(_audioSource);
     }
 
@@ -491,7 +556,6 @@ public class Player : MonoBehaviour
         _probe.Die();
         GameManager.Instance.KillPlayer();
         OnDie?.Invoke();
-        GetComponentInChildren<MeshRenderer>().enabled = false;
         StartCoroutine(Respawn());
     }
 
@@ -503,7 +567,6 @@ public class Player : MonoBehaviour
         var x = ScreenHelper.Instance.ScreenBounds.xMin + 2f;
         transform.position = new Vector3(x, UnityEngine.Random.Range(-yOffset, yOffset), 0f);
         _playerDead = false;
-        GetComponentInChildren<MeshRenderer>().enabled = true;
     }
 
     private void UpdateBarrier(Barrier2 barrier)
@@ -525,25 +588,45 @@ public class Player : MonoBehaviour
     public void Reset()
     {
         _playerDead = false;
-        _ammo = 0;
-        GetComponentInChildren<MeshRenderer>().enabled = false;
+        SetAmmo(0);
         StartCoroutine(Respawn());
         _bullet.Reset();
-        _cannonDeployed = false;
-        _cannonShot.Reset();
+        if (_cannonShot.isActiveAndEnabled)
+        {
+            _cannonDeployed = true;
+        }
+        else
+        {
+            _cannonDeployed = false; 
+            _cannonShot.Reset();
+        }
     }
-
     public void ChangeBarrierRef(Barrier2 barrier)
     {
         _playerCollisions.RemoveEntityRect(EntityCast.Barrier);
         _playerCollisions.AddEntityRect(EntityCast.Barrier, _barrier.BarrierRectContainer);
     }
 
+    private void SetAmmo(int value)
+    {
+        _ammo = value;
+        if (_ammo < 0)
+        {
+            _ammo = 0;
+            _zarlonAmmo = 0;
+        }
+        _ammoUpdateCommand.AmmoValue = _ammo;
+        _zarlonAmmo = _ammo / zarlonAmmoRequirement;
+        _zarlonUpdateCommand.NumberOfCannonShots = _zarlonAmmo;
+        Mediator.Instance.Publish(_ammoUpdateCommand);
+        Mediator.Instance.Publish(_zarlonUpdateCommand);
+    }
+
     private void OnDrawGizmos()
     {
         if (_playerRectContainer == null) return;
 
-        Gizmos.color = Color.blue;
+        Gizmos.color = Color.cyan;
         Gizmos.DrawLine(new Vector3(_playerRectContainer.Bounds.xMin, _playerRectContainer.Bounds.yMin, 0f),
             new Vector3(_playerRectContainer.Bounds.xMin, _playerRectContainer.Bounds.yMax, 0f));
         Gizmos.DrawLine(new Vector3(_playerRectContainer.Bounds.xMax, _playerRectContainer.Bounds.yMin, 0f),

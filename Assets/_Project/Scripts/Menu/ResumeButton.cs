@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using YarsRevenge._Project.Audio;
 
 public class ResumeButton : ShakeButton
 {
-    [SerializeField] private SimpleAudioEvent _onEnterButtonSound;
-    [SerializeField] private SimpleAudioEvent _onClickButtonSound;
+    [SerializeField] private PlaySound _onEnterButtonSound;
+    [SerializeField] private PlaySound _onClickButtonSound;
     [SerializeField] private Image _image;
     private AudioSource _audioSource;
     private Color _color;
@@ -13,6 +14,22 @@ public class ResumeButton : ShakeButton
     private void Start()
     {
         _audioSource = AudioManager.Instance.RequestOmniPresentAudioSource();
+    }
+
+    public override void Awake()
+    {
+        base.Awake();
+        #region Audio Mocking...
+        if (_onEnterButtonSound == null)
+        {
+            _onEnterButtonSound = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
+        }
+
+        if (_onClickButtonSound == null)
+        {
+            _onClickButtonSound = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
+        }
+        #endregion
     }
 
     public override void OnEnter()

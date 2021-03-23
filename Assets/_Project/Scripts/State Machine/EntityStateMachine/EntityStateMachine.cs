@@ -71,8 +71,7 @@ public class EntityStateMachine : MonoBehaviour
             _timer += _pauseDelay;
             _pauseDelay = 0f;
         }
-
-        DebugText.Instance.SetText($"Charge Time = {_chargeTime}");
+        
         _launchSpeed = GetLaunchSpeed();
         _chargeTime = GetChargeTime();
         _stateMachine.Tick();
@@ -111,6 +110,8 @@ public class EntityStateMachine : MonoBehaviour
     {
         if (ScreenHelper.Instance.ScreenBounds.Contains(transform.position))
             return false;
+        
+        _qotile.DeactivateSwirlAnimation();
         return true;
     }
 

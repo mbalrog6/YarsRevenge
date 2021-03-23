@@ -1,5 +1,7 @@
 ﻿using System;
 using UnityEngine;
+using YarsRevenge._Project.Audio;
+using YarsRevenge._Project.Scripts.Audio.Audio_Scripts;
 
 [RequireComponent(typeof(FaceTowardsRotator))]
 public class Probe : MonoBehaviour
@@ -10,7 +12,7 @@ public class Probe : MonoBehaviour
     [SerializeField] private MoveForward2D _mover;
 
     [Header("Audio")] 
-    [SerializeField] private SimpleAudioEvent explosion;
+    [SerializeField] private PlaySound explosion;
     private AudioSource _audioSource;
 
     public event Action OnDie;
@@ -48,6 +50,14 @@ public class Probe : MonoBehaviour
         _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
         
         SetProbeInfo(_probeInfo);
+        
+        #region Audio Mocking...
+
+        if (explosion == null)
+        {
+            explosion = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
+        }
+        #endregion
     }
 
     private void Update()

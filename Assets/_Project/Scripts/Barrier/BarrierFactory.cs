@@ -46,8 +46,8 @@ public class BarrierFactory
        
         for (int i = 0; i < numberOfCells; i++)
         {
-            Vector3 position = new Vector3((i % barrierComponent.Width) * WidthOfCell,
-                Mathf.Floor(i / barrierComponent.Width) * HeightOfCell,
+            Vector3 position = new Vector3((i % barrierComponent.Width) * (WidthOfCell * 0.25f),
+                Mathf.Floor(i / barrierComponent.Width) * (HeightOfCell * 0.25f),
                 0f);
             var cell = GameObject.Instantiate(_cellPrefab, obj.transform).GetComponent<BarrierCell>();
             cell.gameObject.name = $"Cell - {i.ToString()}";
@@ -55,8 +55,8 @@ public class BarrierFactory
             barrierComponent.Barrier[i] = cell;
         }
 
-        barrierComponent.CellHeight = _cellPrefab.transform.localScale.y;
-        barrierComponent.CellWidth = _cellPrefab.transform.localScale.x;
+        barrierComponent.CellHeight = _cellPrefab.transform.localScale.y * 0.25f;
+        barrierComponent.CellWidth = _cellPrefab.transform.localScale.x * 0.25f;
     }
 
     public GameObject GetBarrier(BarrierInfo barrierInfo)

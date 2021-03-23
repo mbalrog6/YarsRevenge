@@ -12,10 +12,9 @@ public class QotileDeath : IState
 
     public void Tick()
     {
-        DebugText.Instance.SetText("Small Explosion Here");
         if (Time.time > _timer)
         {
-            GameStateMachine.Instance.ChangeTo = States.PLAY;
+            GameStateMachine.Instance.ChangeTo = States.ADVANCE_LEVEL;
         }
     }
 
@@ -26,6 +25,6 @@ public class QotileDeath : IState
 
     public void OnExit()
     {
-        
+        _timer = 0f;
     }
 }

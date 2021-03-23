@@ -12,7 +12,6 @@ public class SwirlDeath : IState
     }
     public void Tick()
     {
-        DebugText.Instance.SetText("Big Explosion Here");
         if (Time.time > _timer)
         {
             GameStateMachine.Instance.ChangeTo = States.ADVANCE_LEVEL;

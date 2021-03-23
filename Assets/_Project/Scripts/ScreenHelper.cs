@@ -10,6 +10,7 @@ public class ScreenHelper : MonoBehaviour
     private static Camera _camera;
     private static Rect _screenBounds;
     private static ScreenHelper _instance;
+    private static bool _isFrozen; 
     public static ScreenHelper Instance => _instance;
     public Rect ScreenBounds => _screenBounds;
 
@@ -38,6 +39,9 @@ public class ScreenHelper : MonoBehaviour
 
     private void Update()
     {
+        if (_isFrozen)
+            return; 
+        
         FindBoundries();
         _screenBounds.x = _left;
         _screenBounds.y = _bottom;
@@ -45,6 +49,15 @@ public class ScreenHelper : MonoBehaviour
         _screenBounds.height = _height;
     }
 
+    public static void FreezeBounds()
+    {
+        _isFrozen = true; 
+    }
+
+    public static void Thaw()
+    {
+        _isFrozen = false; 
+    }
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;

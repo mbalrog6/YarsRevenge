@@ -102,13 +102,13 @@ public class GameStateMachine : MonoBehaviour
 
     private void HandleShowDialogue(ShowDialogueCommand command)
     {
-        BriefPauseTime = float.MaxValue;
-        ChangeTo = States.BRIEF_PAUSE;
+        //BriefPauseTime = float.MaxValue;
+        //ChangeTo = States.BRIEF_PAUSE;
     }
 
     private void HandleHideDialogue(HideDialogueCommand command)
     {
-        ChangeTo = States.PLAY;
+        //ChangeTo = States.PLAY;
     }
 }
 

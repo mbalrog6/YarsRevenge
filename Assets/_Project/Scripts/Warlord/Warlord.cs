@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using YarsRevenge._Project.Audio;
 
 public class Warlord : MonoBehaviour
 {
@@ -7,9 +8,11 @@ public class Warlord : MonoBehaviour
     [SerializeField] private int _scoreForSwirl;
     [SerializeField] private int _scoreForWarlord;
 
+
     [Header("Audio")]
-    [SerializeField] private SimpleAudioEvent swirlAttack;
-    [SerializeField] private SimpleAudioEvent chargeUpSound;
+    [SerializeField] private PlaySound swirlAttack;
+
+    [SerializeField] private PlaySound chargeUpSound;
     private AudioSource audioSource;
 
     public static WarlordState State { get; set; } = WarlordState.Idle;
@@ -22,10 +25,28 @@ public class Warlord : MonoBehaviour
     private float _ammoProvidedTimer;
     private Vector3 _offscreenPosition = new Vector3(100f, 100f, 0f );
 
+    private Animator _swirlAnimator;
+    private Transform _swirlTransform;
+
     private void Awake()
     {
         _warlordBounds = new RectContainer( this.gameObject, 1f, 1f, 1f, 1f);
         audioSource = AudioManager.Instance.RequestAudioSource(3);
+
+        _swirlAnimator = GetComponentInChildren<Animator>();
+        _swirlTransform = _swirlAnimator.transform;
+        _swirlTransform.gameObject.SetActive(false);
+
+        if (chargeUpSound == null)
+        {
+            chargeUpSound = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
+        }
+
+        if (swirlAttack == null)
+        {
+            swirlAttack = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
+        }
+        
     }
 
     private void Update()
@@ -44,6 +65,7 @@ public class Warlord : MonoBehaviour
         GameStateMachine.Instance.ChangeTo = State == WarlordState.LaunchedTowardsPlayer ? States.SWIRLDEATH : States.QOTILEDEATH;
         State = WarlordState.Dead;
         transform.position = _offscreenPosition; 
+        DeactivateSwirlAnimation();
     }
 
     public void StopSound() 
@@ -79,5 +101,16 @@ public class Warlord : MonoBehaviour
             new Vector3(_warlordBounds.Bounds.xMax, _warlordBounds.Bounds.yMin, 0f));
         Gizmos.DrawLine(new Vector3(_warlordBounds.Bounds.xMin, _warlordBounds.Bounds.yMax, 0f),
             new Vector3(_warlordBounds.Bounds.xMax, _warlordBounds.Bounds.yMax, 0f));
+    }
+
+    public void ActivateSwirlAnimation()
+    {
+        _swirlTransform.gameObject.SetActive(true);
+        _swirlAnimator.Play("SwirlAppear");
+    }
+
+    public void DeactivateSwirlAnimation()
+    {
+        _swirlTransform.gameObject.SetActive(false);
     }
 }

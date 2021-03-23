@@ -79,3 +79,5 @@ crashlytics-build.properties
 *.7z
 WinBuild/
 WinBuild.zip
+Assets/Pixel Arsenal.meta
+Assets/Pixel Arsenal/

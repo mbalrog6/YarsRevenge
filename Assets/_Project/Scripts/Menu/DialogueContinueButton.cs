@@ -1,5 +1,6 @@
-﻿using DG.Tweening;
-using UnityEngine;
+﻿using UnityEngine;
+using YarsRevenge._Project.Audio;
+using YarsRevenge._Project.Scripts.Audio.Audio_Scripts;
 
 public class DialogueContinueButton : MonoBehaviour, IMenuButton
 {
@@ -27,6 +28,7 @@ public class DialogueContinueButton : MonoBehaviour, IMenuButton
 
     public void OnClick()
     {
+        /*
         if (gameObject.transform.gameObject.activeSelf == false)
             return;
         if (Time.time > _timer)
@@ -38,6 +40,7 @@ public class DialogueContinueButton : MonoBehaviour, IMenuButton
 
         _UIRectTransform.DORewind();
         _UIRectTransform.DOPunchScale(new Vector3(0f, -0.1f, 0f), .2f, 50, 1f);
+        */
     }
 
     public void SetIndex(int index)

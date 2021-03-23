@@ -3,39 +3,35 @@ using UnityEngine;
 
 public class ChargeUp : IState
 {
+    private QotileAnimationController qotileAnimationController;
+    private bool _swirlAnimationActivated;
+    
     private readonly EntityStateMachine _entity;
-    private Color _color1;
-    private Color _color2;
-    private float _flickerRate = .1f;
+    private float _flickerRate = .9f;
     private float _timer;
     private bool _colorChoice;
-    private Material _material;
     private Transform _transform;
     private Barrier2 _barrier;
     private float chargeTime;
     private float chargeTimeMin;
     private float chargeTimeMax;
-    
+
     public ChargeUp(EntityStateMachine entity)
     {
         GameManager.Instance.OnBarrierChanged += UpdateBarrier;
         _entity = entity;
         _transform = entity.transform;
-        _color1 = Color.magenta;
-        _color2 = Color.white;
-        _timer = Time.time + _timer;
         _colorChoice = true;
-        _material = _entity.gameObject.GetComponentInChildren<MeshRenderer>().material; 
     }
     public void Tick()
     {
         if (Time.time > _timer)
         {
             _timer = Time.time + _flickerRate;
-            _colorChoice = !_colorChoice;
+            _entity.QotileEntity.ActivateSwirlAnimation();
+            _swirlAnimationActivated = true;
         }
-
-        _material.color = _colorChoice ? _color1 : _color2;
+        
         _transform.position = _barrier.WarlordSpawnPoint;
         _entity.QotileEntity.PlayChargingSound();
 
@@ -43,15 +39,30 @@ public class ChargeUp : IState
 
     public void OnEnter()
     {
+        _swirlAnimationActivated = false;
+        _timer = Time.time + _flickerRate;
+        qotileAnimationController = QotileAnimationController.Instance;
         _entity.SetTimer(_entity.ChargeTime);
         Warlord.State = WarlordState.ChargeUp;
         _entity.QotileEntity.PlayChargingSound();
+        if (qotileAnimationController != null)
+        {
+            qotileAnimationController.TriggerOpenGate();
+        }
     }
 
     public void OnExit()
     {
+        if (_swirlAnimationActivated == false)
+        {
+            _entity.QotileEntity.ActivateSwirlAnimation();
+        }
         _entity.QotileEntity.StopSound();
         _entity.ChargeTimeAdvancementCount++;
+        if (qotileAnimationController != null)
+        {
+            qotileAnimationController.TriggerCloseGate();
+        }
     }
     
     public void UpdateBarrier(Barrier2 barrier)

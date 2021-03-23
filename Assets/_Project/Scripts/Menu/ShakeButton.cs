@@ -11,7 +11,7 @@ public abstract class ShakeButton : MonoBehaviour, IMenuButton
     [SerializeField] protected float _shakeStrength = 5f;
     [SerializeField] protected int _vibroto = 50; 
 
-    private void Awake()
+    public virtual void Awake()
     {
         _UIRectTransform = GetComponent<RectTransform>();
     }
