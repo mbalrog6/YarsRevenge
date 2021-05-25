@@ -1,7 +1,7 @@
 ﻿using System;
+using DarkTonic.MasterAudio;
 using UnityEngine;
 using YarsRevenge._Project.Audio;
-using YarsRevenge._Project.Scripts.Audio.Audio_Scripts;
 
 [RequireComponent(typeof(FaceTowardsRotator))]
 public class Probe : MonoBehaviour
@@ -10,10 +10,8 @@ public class Probe : MonoBehaviour
     [SerializeField] private Warlord warlord;
     [SerializeField] private int _ScoreValue;
     [SerializeField] private MoveForward2D _mover;
-
-    [Header("Audio")] 
-    [SerializeField] private PlaySound explosion;
-    private AudioSource _audioSource;
+    [SerializeField] private GameObject _probeGlow;
+    [SerializeField] private IonZone _ionZone;
 
     public event Action OnDie;
     public event Action OnRespawn;
@@ -47,17 +45,8 @@ public class Probe : MonoBehaviour
         _probeRectContainer = new RectContainer(this.gameObject, .125f, .125f, .5f, .5f);
         _rotator = GetComponent<FaceTowardsRotator>();
         _initialRotatorTarget = _rotator.Target;
-        _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
-        
-        SetProbeInfo(_probeInfo);
-        
-        #region Audio Mocking...
 
-        if (explosion == null)
-        {
-            explosion = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
-        }
-        #endregion
+        SetProbeInfo(_probeInfo);
     }
 
     private void Update()
@@ -106,6 +95,7 @@ public class Probe : MonoBehaviour
         }
 
         _probeRectContainer.UpdateToTargetPosition();
+        CheckForIonCollision();
     }
 
     private void SetProbeSpeed()
@@ -120,11 +110,16 @@ public class Probe : MonoBehaviour
 
     public void Die()
     {
+        if (_isDead)
+        {
+            return;
+        }
         _isDead = true;
         _visual.SetActive(false);
-        explosion.PlayOneShot(_audioSource);
+        MasterAudio.PlaySoundAndForget("Explosion Small_02");
         _timer = Time.time + _respawnTimer;
         OnDie?.Invoke();
+        _probeGlow.SetActive(false);
     }
 
     public void Respawn()
@@ -151,6 +146,27 @@ public class Probe : MonoBehaviour
         _isDead = true;
         _visual.SetActive(false);
         _timer = Time.time + _respawnTimer;
+    }
+
+    private void CheckForIonCollision()
+    {
+        if (_isDead)
+            return;
+        
+        if (_probeRectContainer.Bounds.Overlaps(_ionZone.IonRectContainer.Bounds))
+        {
+            if (_probeGlow.activeSelf == false) 
+            {
+                _probeGlow.SetActive(true);
+            }
+        }
+        else
+        {
+            if (_probeGlow.activeSelf == true)
+            {
+                _probeGlow.SetActive(false);
+            }
+        }
     }
 
     private void OnDrawGizmos()

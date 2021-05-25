@@ -4,11 +4,13 @@ using UnityEngine;
 public class SwirlDeath : IState
 {
     private readonly GameStateMachine _gameStateMachine;
-    private float _timer; 
-
+    private float _timer;
+    private ExplosionTransionStartCommand _explosionStartCommand;
+    public Warlord _warlord { get; set; }
     public SwirlDeath( GameStateMachine gameStateMachine)
     {
         _gameStateMachine = gameStateMachine;
+        _explosionStartCommand = new ExplosionTransionStartCommand();
     }
     public void Tick()
     {
@@ -20,6 +22,12 @@ public class SwirlDeath : IState
 
     public void OnEnter()
     {
+        if (_warlord != null)
+        {
+            _explosionStartCommand.Position = _warlord.DeathPositoin;
+            Debug.Log($"x: {_explosionStartCommand.Position.x}, y: {_explosionStartCommand.Position.y} - my pos x: {_warlord.DeathPositoin.x}, y: {_warlord.DeathPositoin.y}");
+        }
+        Mediator.Instance.Publish(_explosionStartCommand);
         _timer = Time.time + 2f;
         GameManager.Instance.AddLife(1);
     }
@@ -28,4 +36,5 @@ public class SwirlDeath : IState
     {
         _timer = 0f; 
     }
+    
 }

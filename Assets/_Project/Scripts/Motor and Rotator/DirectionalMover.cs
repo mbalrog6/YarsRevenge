@@ -29,8 +29,13 @@ public class DirectionalMover : MonoBehaviour, IMover
 
     private void Move()
     {
+        if (GameStateMachine.Instance.CurrentState == States.BRIEF_PAUSE ||
+            GameStateMachine.Instance.CurrentState == States.PAUSE)
+        {
+            return;
+        }
+        
         _directionVector = CardinalDirections.GetUnitVectorFromCardinalDirection(Direction);
-
         _entity.position += _directionVector * (Time.deltaTime * Speed);
     }
 }

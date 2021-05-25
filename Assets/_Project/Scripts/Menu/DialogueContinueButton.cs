@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using YarsRevenge._Project.Audio;
-using YarsRevenge._Project.Scripts.Audio.Audio_Scripts;
 
 public class DialogueContinueButton : MonoBehaviour, IMenuButton
 {

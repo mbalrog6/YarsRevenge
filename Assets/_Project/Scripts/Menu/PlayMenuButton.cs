@@ -1,24 +1,18 @@
-﻿using UnityEngine;
+﻿
+using UnityEngine;
 using UnityEngine.UI;
-using YarsRevenge._Project.Audio;
-using YarsRevenge._Project.Scripts.Audio.Audio_Scripts;
+using DarkTonic.MasterAudio;
 
 namespace YarsRevenge._Project.Scripts.Menu
 {
     public class PlayMenuButton : ShakeButton
     {
-        [SerializeField] private SimpleAudioEvent _onEnterButtonSound;
-        [SerializeField] private SimpleAudioEvent _onClickButtonSound;
         [SerializeField] private Image _image;
         [SerializeField] private Image _imageHighlight;
+        [SerializeField] private ActiveText _activeText;
+        
         private Color _color;
         private bool _initalized = false;
-        private AudioSource _audioSource;
-
-        private void Start()
-        {
-            _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
-        }
 
         public override void OnEnter()
         {
@@ -26,30 +20,29 @@ namespace YarsRevenge._Project.Scripts.Menu
             _color = _image.color;
             _image.color = Color.white;
             _imageHighlight.enabled = true;
+            _activeText.IsActive = true;
+            _activeText.UpdateUIText();
 
             if (_initalized == false)
             {
                 _initalized = true;
                 return;
             }
-            if (_audioSource != null && _onEnterButtonSound != null)
-            {
-                _onEnterButtonSound.PlayOneShot(_audioSource);
-            }
+
+            MasterAudio.PlaySoundAndForget("Rebound");
         }
 
         public override void OnExit()
         {
             _image.color = _color;
             _imageHighlight.enabled = false;
+            _activeText.IsActive = false;
+            _activeText.UpdateUIText();
         }
 
         public override void OnClick()
         {
-            if (!_onClickButtonSound == null)
-            {
-                _onClickButtonSound.PlayOneShot(_audioSource);
-            }
+            MasterAudio.PlaySoundAndForget("Click Ui");
             GameStateMachine.Instance.ChangeTo = States.LOADING;
         }
     }

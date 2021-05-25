@@ -30,16 +30,21 @@ public class EntityStateMachine : MonoBehaviour
         var launchTowardsPlayer = new LaunchTowardsPlayer(this, player);
         var quotileDied = new Died( _qotile );
         var reset = new ResetQotile( this );
+        var warlordPaused = new WarlordPaused(this, _qotile);
 
         _stateMachine.AddState(idle);
         _stateMachine.AddState(chargeUp);
         _stateMachine.AddState(launchTowardsPlayer);
         _stateMachine.AddState(quotileDied);
+        _stateMachine.AddState(warlordPaused);
 
         _stateMachine.AddTransition(idle, chargeUp, () => Time.time > _timer);
         _stateMachine.AddTransition(chargeUp, launchTowardsPlayer, () => Time.time > _timer);
         _stateMachine.AddTransition(launchTowardsPlayer, idle, () => CheckForOffScreen());
         _stateMachine.AddTransition( reset, idle, () => Warlord.State == WarlordState.Idle);
+        _stateMachine.AddTransition(idle, warlordPaused, () => Warlord.State == WarlordState.Paused);
+        _stateMachine.AddTransition( chargeUp, warlordPaused, () => Warlord.State == WarlordState.Paused);
+        _stateMachine.AddTransition( launchTowardsPlayer, warlordPaused, () => Warlord.State == WarlordState.Paused);
 
         _stateMachine.AddAnyStateTransition(quotileDied, () => Warlord.State == WarlordState.Dead);
         _stateMachine.AddAnyStateTransition(reset, () => Warlord.State == WarlordState.Reset);

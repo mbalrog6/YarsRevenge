@@ -2,6 +2,7 @@
 
 public class IonZone : MonoBehaviour
 {
+    [SerializeField] private float _widthOffset = 0f;
     private Transform _ionZoneVisual;
     private float _width;
     private float _height;
@@ -31,9 +32,9 @@ public class IonZone : MonoBehaviour
     {
         _height = ScreenHelper.Instance.ScreenBounds.height;
         _width = 6f;
-        _rectContainer = new RectContainer(this.gameObject, 0, 0, _width, _height);
+        _rectContainer = new RectContainer(this.gameObject, 0, 0, _width + _widthOffset, _height);
         Vector3 position = new Vector3(
-            ScreenHelper.Instance.ScreenBounds.xMin + (ScreenHelper.Instance.ScreenBounds.width / 3),
+            ScreenHelper.Instance.ScreenBounds.xMin + (ScreenHelper.Instance.ScreenBounds.width / 2.8f),
             ScreenHelper.Instance.ScreenBounds.center.y,
             0f);
         transform.position = position;
@@ -45,13 +46,13 @@ public class IonZone : MonoBehaviour
     {
         _height = ScreenHelper.Instance.ScreenBounds.height;
         _width = 3f;
-        _rectContainer = new RectContainer(this.gameObject, 0, 0, _width, _height);
+        _rectContainer = new RectContainer(this.gameObject, 0, 0, _width + _widthOffset, _height);
         Vector3 position = new Vector3(
-            ScreenHelper.Instance.ScreenBounds.xMin + (ScreenHelper.Instance.ScreenBounds.width / 3),
+            ScreenHelper.Instance.ScreenBounds.xMin + (ScreenHelper.Instance.ScreenBounds.width / 2.8f),
             ScreenHelper.Instance.ScreenBounds.center.y,
             0f);
-        transform.position = position; 
-        
+        transform.position = position;
+
         _ionZoneVisual.localScale = new Vector3(_width, _height, 1f);
     }
 
@@ -62,7 +63,8 @@ public class IonZone : MonoBehaviour
 
     private void SetRectContainer()
     {
-        _rectContainer.SetRectContainer(0, 0, _width, _height);
+        _rectContainer.SetRectContainer(0, 0, _width + _widthOffset, _height);
+        //_ionZoneVisual.localScale = new Vector3(_width * 0.4166f, _height * 0.2272f, 1f);
         _ionZoneVisual.localScale = new Vector3(_width, _height, 1f);
     }
     private void OnDrawGizmos()

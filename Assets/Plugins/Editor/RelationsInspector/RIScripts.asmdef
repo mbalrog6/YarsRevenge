@@ -1,0 +1,9 @@
+{
+    "name": "RIScripts",
+    "references": [
+        "MAScripts",
+        "RIEditor"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": []
+}

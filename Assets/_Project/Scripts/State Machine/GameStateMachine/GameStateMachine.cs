@@ -25,6 +25,9 @@ public class GameStateMachine : MonoBehaviour
     private IState _briefPause;
     private bool _subscribe = true;
 
+    private QotileDeath _qotileDeath;
+    private SwirlDeath _swirlDeath;
+
     private void Awake()
     {
         if (_instance != null)
@@ -46,9 +49,21 @@ public class GameStateMachine : MonoBehaviour
         var play = new Play(this);
         var loading = new Loading(this);
         var reset = new Reset(this );
-        var swirlDeath = new SwirlDeath( this );
-        var qotileDeath = new QotileDeath(this);
+        _swirlDeath = new SwirlDeath( this );
+        _qotileDeath = new QotileDeath(this);
         var advanceLevel = new AdvanceLevel(this);
+        var playerDeath = new PlayerDeath(this);
+        
+        _stateMachine.AddState(menu);
+        _stateMachine.AddState(pause);
+        _stateMachine.AddState(_briefPause);
+        _stateMachine.AddState(play);
+        _stateMachine.AddState(loading);
+        _stateMachine.AddState(reset);
+        _stateMachine.AddState(_swirlDeath);
+        _stateMachine.AddState(_qotileDeath);
+        _stateMachine.AddState(advanceLevel);
+        _stateMachine.AddState(playerDeath);
         
         _stateMachine.AddTransition( menu, loading, () => ChangeTo == States.LOADING);
         _stateMachine.AddTransition( loading, play, () => loading.IsFinished);
@@ -61,13 +76,19 @@ public class GameStateMachine : MonoBehaviour
         _stateMachine.AddTransition( play, _briefPause, () => ChangeTo == States.BRIEF_PAUSE);
         _stateMachine.AddTransition( _briefPause, play, () => ChangeTo == States.PLAY);
         
-        _stateMachine.AddTransition( play, swirlDeath, () => ChangeTo == States.SWIRLDEATH);
-        _stateMachine.AddTransition( play, qotileDeath, () => ChangeTo == States.QOTILEDEATH);
+        _stateMachine.AddTransition( play, _swirlDeath, () => ChangeTo == States.SWIRLDEATH);
+        _stateMachine.AddTransition( play, _qotileDeath, () => ChangeTo == States.QOTILEDEATH);
         _stateMachine.AddTransition( advanceLevel, play, () => ChangeTo == States.PLAY);
         
         _stateMachine.AddAnyStateTransition( advanceLevel, () => ChangeTo == States.ADVANCE_LEVEL);
         
         _stateMachine.SetState(menu);
+    }
+
+    public void SetWarlordRef(Warlord warlord)
+    {
+        _swirlDeath._warlord = warlord;
+        _qotileDeath._warlord = warlord; 
     }
 
     private void Update()
@@ -124,5 +145,6 @@ public enum States
     BRIEF_PAUSE,
     SWIRLDEATH,
     QOTILEDEATH,
-    ADVANCE_LEVEL
+    ADVANCE_LEVEL,
+    PLAYERDEATH, 
 }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DarkTonic.MasterAudio;
+using UnityEngine;
 using YarsRevenge._Project.Audio;
 
 public class Warlord : MonoBehaviour
@@ -7,13 +8,8 @@ public class Warlord : MonoBehaviour
     [SerializeField] private float ammoCooldown;
     [SerializeField] private int _scoreForSwirl;
     [SerializeField] private int _scoreForWarlord;
-
-
-    [Header("Audio")]
-    [SerializeField] private PlaySound swirlAttack;
-
-    [SerializeField] private PlaySound chargeUpSound;
-    private AudioSource audioSource;
+    [SerializeField] private QotileFX _qotileFX;
+    private GameStateMachine _gameStateMachine;
 
     public static WarlordState State { get; set; } = WarlordState.Idle;
 
@@ -23,35 +19,35 @@ public class Warlord : MonoBehaviour
     public RectContainer WarlordRectContainer => _warlordBounds;
     private RectContainer _warlordBounds;
     private float _ammoProvidedTimer;
-    private Vector3 _offscreenPosition = new Vector3(100f, 100f, 0f );
+    private Vector3 _offscreenPosition = new Vector3(100f, 100f, 0f);
 
     private Animator _swirlAnimator;
     private Transform _swirlTransform;
+    public Vector3 DeathPositoin { get; private set; }
 
     private void Awake()
     {
-        _warlordBounds = new RectContainer( this.gameObject, 1f, 1f, 1f, 1f);
-        audioSource = AudioManager.Instance.RequestAudioSource(3);
+        _warlordBounds = new RectContainer(this.gameObject, 1f, 1f, 1f, 1f);
 
         _swirlAnimator = GetComponentInChildren<Animator>();
         _swirlTransform = _swirlAnimator.transform;
         _swirlTransform.gameObject.SetActive(false);
+    }
 
-        if (chargeUpSound == null)
-        {
-            chargeUpSound = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
-        }
-
-        if (swirlAttack == null)
-        {
-            swirlAttack = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
-        }
-        
+    private void Start()
+    {
+        _gameStateMachine = FindObjectOfType<GameStateMachine>();
+        _gameStateMachine.SetWarlordRef(this);
     }
 
     private void Update()
     {
         _warlordBounds.UpdateToTargetPosition();
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            Die();
+        }
     }
 
     public int GetAmmo()
@@ -62,30 +58,39 @@ public class Warlord : MonoBehaviour
 
     public void Die()
     {
-        GameStateMachine.Instance.ChangeTo = State == WarlordState.LaunchedTowardsPlayer ? States.SWIRLDEATH : States.QOTILEDEATH;
+        _qotileFX.DisableFX();
+        DeathPositoin = transform.position;
+        GameStateMachine.Instance.ChangeTo =
+            State == WarlordState.LaunchedTowardsPlayer ? States.SWIRLDEATH : States.QOTILEDEATH;
         State = WarlordState.Dead;
-        transform.position = _offscreenPosition; 
+        transform.position = _offscreenPosition;
         DeactivateSwirlAnimation();
+        MasterAudio.PlaySoundAndForget("SwooshExplosion");
     }
 
-    public void StopSound() 
+    public void StopSound()
     {
-        audioSource.Stop();
+        MasterAudio.StopBus("Qotile");
     }
 
     public void PlayLaunchAtSound()
     {
-        if (audioSource.isPlaying)
+        _qotileFX.DisableFX();
+
+        if (MasterAudio.IsSoundGroupPlaying("FastSwirl"))
             return;
-        
-        swirlAttack.Play(audioSource);
+
+        MasterAudio.PlaySoundAndForget("FastSwirl");
     }
 
     public void PlayChargingSound()
     {
-        if (audioSource.isPlaying)
+        _qotileFX.EnableFX();
+
+        if (MasterAudio.IsSoundGroupPlaying("wawaSound"))
             return;
-        chargeUpSound.Play(audioSource);
+
+        MasterAudio.PlaySoundAndForget("wawaSound");
     }
 
     private void OnDrawGizmos()

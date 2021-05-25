@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using DarkTonic.MasterAudio;
+using UnityEngine;
 
 public class QotileAnimationController : MonoBehaviour
 {
@@ -21,6 +22,7 @@ public class QotileAnimationController : MonoBehaviour
         if (qotileAnimator != null)
         {
             qotileAnimator.SetBool(_IsClosed, false);
+            MasterAudio.PlaySoundAndForget("GateOpening");
         }
     }
 
@@ -29,6 +31,7 @@ public class QotileAnimationController : MonoBehaviour
         if (qotileAnimator != null)
         {
             qotileAnimator.SetBool(_IsClosed, true);
+            MasterAudio.PlaySoundAndForget("GateOpening");
         }
     }
 }

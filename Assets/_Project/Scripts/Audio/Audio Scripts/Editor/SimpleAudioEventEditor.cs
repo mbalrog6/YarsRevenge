@@ -1,10 +1,12 @@
-﻿using UnityEditor;
+﻿
+#if UNITY_EDITOR
+using UnityEditor;
+
+
 using UnityEngine;
 
-namespace YarsRevenge._Project.Scripts.Audio.Audio_Scripts.Editor
-{
    [CustomEditor(typeof(SimpleAudioEvent))]
-   public class SimpleAudioEventEditor : UnityEditor.Editor
+   public class SimpleAudioEventEditor : Editor
    {
       private AudioSource _previewSource;
 
@@ -37,4 +39,4 @@ namespace YarsRevenge._Project.Scripts.Audio.Audio_Scripts.Editor
          EditorGUI.EndDisabledGroup();
       }
    }
-}
+#endif

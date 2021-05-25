@@ -1,4 +1,5 @@
 ﻿using System;
+using DarkTonic.MasterAudio;
 using UnityEngine;
 using YarsRevenge._Project.Audio;
 
@@ -13,10 +14,6 @@ public class Bullet : MonoBehaviour
     [SerializeField] private ParticleSystem bulletExplosionFX;
 
     private Barrier2 barrier;
-    
-    [Header("Audio")]
-    [SerializeField] private PlaySound splatterSound;
-    private AudioSource _audioSource;
     private Vector3 _fireDirection;
 
     public bool HasBeenFired { get; private set; }
@@ -25,8 +22,6 @@ public class Bullet : MonoBehaviour
 
     private void Awake()
     {
-        _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
-
         if (bulletFX == null)
         {
             bulletFX = GetComponent<ParticleSystem>();
@@ -36,13 +31,6 @@ public class Bullet : MonoBehaviour
         {
             bulletFX = GetComponent<ParticleSystem>();
         }
-
-        #region Audio Mixing...
-        if (splatterSound == null)
-        {
-            splatterSound = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
-        }
-        #endregion
     }
 
     private void Start()
@@ -100,7 +88,7 @@ public class Bullet : MonoBehaviour
             //var index = barrier.GetCellFromVector3(transform.position);
             if (index.HasValue)
             {
-                splatterSound.PlayOneShot(_audioSource);
+                MasterAudio.PlaySoundAndForget("Spit-Hits-Barrier");
                 barrier.DisableCellsInPlusPattern(index.Value);
                 bulletExplosionFX.transform.position = transform.position;
                 bulletExplosionFX.Play();

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections;
+using DarkTonic.MasterAudio;
 using UnityEngine;
 using YarsRevenge._Project.Audio;
-using YarsRevenge._Project.Scripts.Audio.Audio_Scripts;
 
 public class Player : MonoBehaviour
 {
@@ -12,6 +12,8 @@ public class Player : MonoBehaviour
     [SerializeField] private Warlord _warlord;
     [SerializeField] private Probe _probe;
     [SerializeField] private IonZone _ionZone;
+    [SerializeField] private FullRevolutionRotation _fullRevolutionRotation;
+    [SerializeField] private GameObject _flyGlow;
 
     [SerializeField] private float movementSpeed;
     [SerializeField] private Transform[] _frontContactPoints;
@@ -28,11 +30,8 @@ public class Player : MonoBehaviour
     private int _chewString = Animator.StringToHash("Chew");
     private int _shootString = Animator.StringToHash("Shoot"); 
 
-    [Header("Audio")] 
-    [SerializeField] private PlaySound shotSound;
-    [SerializeField] private PlaySound eatSound;
+    [Header("Audio")]
     [SerializeField] private PlaySound dieSound;
-    [SerializeField] private PlaySound ionCloudAudio;
     [SerializeField] private float _leftScreenEdgePadding;
     public event Action OnDie;
 
@@ -71,16 +70,18 @@ public class Player : MonoBehaviour
 
     private float _warlordAmmoTimer;
     private bool _playerDead = false;
-    private AudioSource _audioSource;
-    private AudioSource _buzzSound;
-    private AudioSource _ionCloud;
     private AmmoUpdateCommand _ammoUpdateCommand;
     private UpdateZarlonCannonCommand _zarlonUpdateCommand;
     private int zarlonAmmoRequirement = 10;
+    private SpriteRenderer _spriteRender;
+    private FXFadeOut _fadeFx;
 
 
     private void Awake()
     {
+        _spriteRender = GetComponentInChildren<SpriteRenderer>();
+        _fadeFx = GetComponentInChildren<FXFadeOut>();
+        
         _ammoUpdateCommand = new AmmoUpdateCommand(0);
         _zarlonUpdateCommand = new UpdateZarlonCannonCommand();
         _eatTimer = 0f;
@@ -95,10 +96,6 @@ public class Player : MonoBehaviour
         _bullet.OnDisabled += Handle_BulletDisabled;
         _cannonShot.OnDie += Handle_CannonShotOnDie;
 
-        _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
-        _buzzSound = AudioManager.Instance.RequestAudioSource(1);
-        _ionCloud = AudioManager.Instance.RequestAudioSource(2);
-
         _ammo = 0;
         _zarlonAmmo = 0;
 
@@ -107,25 +104,9 @@ public class Player : MonoBehaviour
         GameManager.Instance.OnBarrierChanged += UpdateBarrier;
         
         #region Audio Mocking...
-
-        if (shotSound ==  null)
-        {
-            shotSound = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
-        }
-
-        if (eatSound ==  null)
-        {
-            eatSound = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
-        }
-
         if (dieSound ==  null)
         {
             dieSound = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
-        }
-
-        if (ionCloudAudio ==  null)
-        {
-            ionCloudAudio = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
         }
         #endregion
     }
@@ -142,6 +123,8 @@ public class Player : MonoBehaviour
         _playerInputDTO = InputManager.Instance.PlayerInputDTO;
 
         SetAmmo(0);
+
+        _fullRevolutionRotation.IsFinished += TurnOffSprite;
     }
 
     private void Handle_CannonShotOnDie()
@@ -165,8 +148,22 @@ public class Player : MonoBehaviour
         if (GameStateMachine.Instance.CurrentState == States.PAUSE ||
             GameStateMachine.Instance.CurrentState == States.BRIEF_PAUSE)
         {
+            MasterAudio.PauseBus("Player Sounds");
+            MasterAudio.StopAllOfSound("IonStatic");
             _fireBulletCooldownTimer = Time.time + 0.1f;
             _cannonShotMover.Paused = true;
+            IsPaused = true;
+            return;
+        }
+
+        if (IsPaused == true)
+        {
+            MasterAudio.UnpauseBus("Player Sounds");
+            IsPaused = false;
+        }
+
+        if (_playerDead == true)
+        {
             return;
         }
 
@@ -178,12 +175,14 @@ public class Player : MonoBehaviour
 
         if (PlayerInputDTO.Direction != CardinalDirection.NONE)
         {
-            if (!_buzzSound.isPlaying)
-                dieSound.Play(_buzzSound);
+            if (MasterAudio.IsSoundGroupPlaying("LongBuzz") == false)
+            {
+                MasterAudio.PlaySoundAndForget("LongBuzz");
+            }
         }
         else
         {
-            _buzzSound.Stop();
+          MasterAudio.StopAllOfSound("LongBuzz");
         }
 
         BarrierCellIndex = null;
@@ -217,6 +216,8 @@ public class Player : MonoBehaviour
         PlayIonSound();
     }
 
+    public bool IsPaused { get; private set; }
+
     private void PlayIonSound()
     {
         if (_ionZone.isActiveAndEnabled == false )
@@ -224,12 +225,25 @@ public class Player : MonoBehaviour
         
         if (_playerCollisions.CheckIfPlayerHit(_ionZone.IonRectContainer))
         {
-            if (!_ionCloud.isPlaying)
-                ionCloudAudio.Play(_ionCloud);
+            if (MasterAudio.IsSoundGroupPlaying("IonStatic") == false && _playerDead != true)
+            {
+                MasterAudio.PlaySoundAndForget("IonStatic");
+            }
+            if (_flyGlow.activeSelf == false && _playerDead == false)
+            {
+                _flyGlow.SetActive(true);
+            }
         }
         else
         {
-            _ionCloud.Stop();
+            if (MasterAudio.IsSoundGroupPlaying("IonStatic"))
+            {
+                MasterAudio.StopAllOfSound("IonStatic");
+            }
+            if (_flyGlow.activeSelf == true)
+            {
+                _flyGlow.SetActive(false);
+            }
         }
     }
 
@@ -240,7 +254,7 @@ public class Player : MonoBehaviour
 
         if ( _ionZone.isActiveAndEnabled )
         {
-            if (_probe.ProbeRectContainer.Bounds.Overlaps(_ionZone.IonRectContainer.Bounds))
+            if (_playerRectContainer.Bounds.Overlaps(_ionZone.IonRectContainer.Bounds))
             {
                 return;
             }
@@ -502,7 +516,7 @@ public class Player : MonoBehaviour
             _fireBulletCooldownTimer = Time.time + bulletFireRate;
             SetAmmo(_ammo - 1);
 
-            shotSound.PlayOneShot(_audioSource);
+            MasterAudio.PlaySoundAndForget("Spit");
         }
     }
 
@@ -521,8 +535,8 @@ public class Player : MonoBehaviour
 
         if(chewDust.isStopped)
             chewDust.Play();
-        
-        eatSound.Play(_audioSource);
+
+        MasterAudio.PlaySoundAndForget("Eating Guts");
     }
 
     private int? CheckPlayerContactPointsForBarriorCollision(Transform[] contactPoints, Vector3 offset)
@@ -553,20 +567,30 @@ public class Player : MonoBehaviour
     {
         Debug.Log("Player Died");
         _playerDead = true;
+        playerAnimator.SetBool("IsDead", true);
+        MasterAudio.StopBus("Player Sounds");
+        MasterAudio.StopAllOfSound("IonStatic");
+        MasterAudio.PlaySoundAndForget("PlayerHit");
+        MasterAudio.PlaySoundAndForget("PlayerExplosion");
         _probe.Die();
         GameManager.Instance.KillPlayer();
         OnDie?.Invoke();
+        _fullRevolutionRotation.StartRotation();
+        _fadeFx.StartFade();
+        _flyGlow.SetActive(false);
         StartCoroutine(Respawn());
     }
 
     public IEnumerator Respawn()
     {
-        yield return new WaitForSeconds(.3f);
+        yield return new WaitForSeconds(2f);
         Debug.Log("RESPAWN SET");
+        TurnOnSprite();
         var yOffset = ScreenHelper.Instance.ScreenBounds.yMax - 2f;
         var x = ScreenHelper.Instance.ScreenBounds.xMin + 2f;
         transform.position = new Vector3(x, UnityEngine.Random.Range(-yOffset, yOffset), 0f);
         _playerDead = false;
+        playerAnimator.SetBool("IsDead", false);
     }
 
     private void UpdateBarrier(Barrier2 barrier)
@@ -620,6 +644,17 @@ public class Player : MonoBehaviour
         _zarlonUpdateCommand.NumberOfCannonShots = _zarlonAmmo;
         Mediator.Instance.Publish(_ammoUpdateCommand);
         Mediator.Instance.Publish(_zarlonUpdateCommand);
+    }
+
+    public void TurnOffSprite()
+    {
+        _spriteRender.enabled = false;
+        CameraShake.CustomShake(.3f, .5f, 0);
+    }
+
+    public void TurnOnSprite()
+    {
+        _spriteRender.enabled = true;
     }
 
     private void OnDrawGizmos()

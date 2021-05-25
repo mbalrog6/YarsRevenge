@@ -1,5 +1,8 @@
-﻿using Audio;
+﻿#if UNITY_EDITOR
 using UnityEditor;
+
+
+using Audio;
 using UnityEngine;
 
 [CustomPropertyDrawer(typeof(RangedFloat), true)]
@@ -47,3 +50,4 @@ public class RangedFloatRender : PropertyDrawer
     EditorGUI.EndProperty();
   }
 }
+#endif

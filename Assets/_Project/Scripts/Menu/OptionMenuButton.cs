@@ -1,26 +1,16 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
+using DarkTonic.MasterAudio;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine;
-using YarsRevenge._Project.Audio;
-using YarsRevenge._Project.Scripts.Audio.Audio_Scripts;
 
 public class OptionMenuButton : ShakeButton
 {
-    [SerializeField] private SimpleAudioEvent _onEnterButtonSound;
     [SerializeField] private Image _image;
     [SerializeField] private Image _imageHighlight;
-    [SerializeField] private TextMeshProUGUI _textElement;
+    [SerializeField] private ActiveText _activeText;
+    [SerializeField] private TextMeshProUGUI _text;
     private Color _color;
-    private AudioSource _audioSource;
-    private String _originalText; 
-
-    private void Start()
-    {
-        _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
-        _originalText = _textElement.text;
-    }
 
     public override void OnEnter()
     {
@@ -28,28 +18,30 @@ public class OptionMenuButton : ShakeButton
         _color = _image.color;
         _image.color = Color.white;
         _imageHighlight.enabled = true;
-        
-        if (_audioSource != null && _onEnterButtonSound != null)
-        {
-            _onEnterButtonSound.PlayOneShot(_audioSource);
-        }
+        _activeText.IsActive = true;
+        _activeText.UpdateUIText();
+
+        MasterAudio.PlaySoundAndForget("Rebound");
     }
 
     public override void OnExit()
     {
         _image.color = _color;
         _imageHighlight.enabled = false;
+        _activeText.IsActive = false;
+        _activeText.UpdateUIText();
     }
 
     public override void OnClick()
     {
+        MasterAudio.PlaySoundAndForget("Click Ui");
         StartCoroutine(UpdateText());
     }
 
     private IEnumerator UpdateText()
     {
-        _textElement.text = "Sorry!";
+        _text.text = "Sorry!";
         yield return new WaitForSeconds(1f);
-        _textElement.text = _originalText;
+        _activeText.UpdateUIText();
     }
 }

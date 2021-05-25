@@ -1,0 +1,9 @@
+{
+    "name": "MAEditor",
+    "references": [
+        "MAScripts",
+        "RIScripts"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": []
+}

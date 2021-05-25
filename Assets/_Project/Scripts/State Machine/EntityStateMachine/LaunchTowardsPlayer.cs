@@ -27,7 +27,12 @@ public class LaunchTowardsPlayer : IState
     {
         if (_player == null)
             return;
-        
+
+        if (GameStateMachine.Instance.CurrentState == States.BRIEF_PAUSE ||
+            GameStateMachine.Instance.CurrentState == States.PAUSE)
+        {
+            return;
+        }
         _entity.transform.position += _luanchDirection * (_speed * Time.deltaTime);
         _entity.QotileEntity.PlayLaunchAtSound();
     }

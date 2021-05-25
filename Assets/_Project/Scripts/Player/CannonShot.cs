@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using DarkTonic.MasterAudio;
 using UnityEngine;
-using YarsRevenge._Project.Audio;
-using YarsRevenge._Project.Scripts.Audio.Audio_Scripts;
 
 public class CannonShot : MonoBehaviour
 {
@@ -10,12 +9,6 @@ public class CannonShot : MonoBehaviour
     [SerializeField] private Probe probe;
     [SerializeField] private Warlord qotile;
     [SerializeField] private Transform[] contactPoints;
-
-    [Header("Audio")]
-    [SerializeField] private PlaySound explosion;
-    [SerializeField] private PlaySound cannonFire;
-    [SerializeField] private PlaySound rebound;
-    private AudioSource _audioSource;
 
     private RectContainer _collisionRect;
     private DirectionalMover _mover;
@@ -37,23 +30,7 @@ public class CannonShot : MonoBehaviour
         _yMover = GetComponentInChildren<MirrorTargetYMover>();
         HasFired = false;
         Direction = CardinalDirection.EAST;
-        _audioSource = AudioManager.Instance.RequestOneShotAudioSource();
         GameManager.Instance.OnBarrierChanged += UpdateBarrier;
-
-        if (cannonFire == null)
-        {
-            cannonFire = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
-        }
-
-        if (rebound == null)
-        {
-            rebound = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
-        }
-
-        if (explosion == null)
-        {
-            explosion = ScriptableObject.CreateInstance<MockSimpleAudioEvent>();
-        }
     }
 
     private void Update()
@@ -127,7 +104,7 @@ public class CannonShot : MonoBehaviour
                 {
                     Direction = CardinalDirection.WEST;
                     _mover.Direction = Direction;
-                    rebound.PlayOneShot(_audioSource);
+                    MasterAudio.PlaySoundAndForget("Rebound");
                 }
                 else
                 {
@@ -190,7 +167,7 @@ public class CannonShot : MonoBehaviour
     public void Fire()
     {
         EnableMover();
-        cannonFire.PlayOneShot(_audioSource);
+        MasterAudio.PlaySoundAndForget("CannonShot");
         HasFired = true;
     }
 
@@ -198,7 +175,7 @@ public class CannonShot : MonoBehaviour
     {
         GameStateMachine.Instance.BriefPauseTime = .3f;
         GameStateMachine.Instance.ChangeTo = States.BRIEF_PAUSE;
-        explosion.PlayOneShot(_audioSource);
+        MasterAudio.PlaySoundAndForget("EMP Explosion_02");
         OnExplode?.Invoke();
         Die();
     }
